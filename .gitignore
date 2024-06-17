@@ -7,3 +7,21 @@
 **/*.html
 
 **/*.DS_Store
+
+#this ignores csv file
+**/*.csv
+
+#this ignores excel file
+**/*.xlsx
+
+#this ignores json file
+**/*.json
+
+#this ignores database file
+**/*.db
+
+#this ignores Javascript file
+**/*.js
+
+#this ignores css file
+**/*.css
