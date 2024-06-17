@@ -1,0 +1,20 @@
+---
+title: "PATHS"
+author: "untitle"
+date: "2024-06-17"
+output: html_document
+---
+
+<style>
+
+body {
+font-family: Times New Roman
+}
+
+</style>
+
+## Problem Statements
+	
+Working with ThreatPie, we will analyze web browsing data, find patterns leading to the spread of misinformation, and ultimately address how this misinformation threatens modern-day democracy.  
+
+
