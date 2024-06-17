@@ -5,3 +5,5 @@
 
 #hide the html files
 **/*.html
+
+**/*.DS_Store
