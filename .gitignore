@@ -3,6 +3,8 @@
 .RData
 .Ruserdata
 
+data/
+
 #hide the html files
 **/*.html
 
