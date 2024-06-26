@@ -29,7 +29,7 @@ wp3_list_alternative_media <- wp3_list_alternative_media %>%
   rename (url=`Media`)
 
 #Checking data--(1) repeat
-idx<-which(wp3_list_alternative_media$url %in% disinformation$url) #this show which line(s) already h(ave in the other dataset
+idx<-which(wp3_list_alternative_media$url %in% disinformation$url) #this show which line(s) already have in the other dataset
 #Remove the repeat found in line 32
 wp3_list_alternative_media <- wp3_list_alternative_media [-idx,]
 
@@ -37,5 +37,16 @@ wp3_list_alternative_media <- wp3_list_alternative_media [-idx,]
 disinformation <- bind_rows(disinformation, wp3_list_alternative_media %>% select(url))
 
 #Load webtrackings
-yougov <- load("data/YouGov/app_usage.RData")
-forthright <- load("data/FORTHRIGHT/forthright_webtracking.RData")
+yougov <- load("data/YouGov/webtracking.RData")
+
+webtracking <- webtracking %>% 
+  filter(iso2=="US")
+
+#Save dataset as csv
+write_csv(webtracking, "yougov_webtrack.csv")
+
+#Load csv
+us_webtrack <- read_csv("data/yougov_webtrack.csv")
+
+us_webtrack <- us_webtrack %>% 
+  mutate(person_id=substr(person_id, 4, 12))
