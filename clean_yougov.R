@@ -43,19 +43,15 @@ yougov <- load("data/YouGov/webtracking.RData")
 webtracking <- webtracking %>% 
   filter(iso2=="US")
 
-#Save dataset as csv
-write_csv(webtracking, "yougov_webtrack.csv")
-#Put the file just saved in 'data' folder before process to the next step
 
-#Load csv
-us_webtrack <- read_csv("data/yougov_webtrack.csv")
+# identified misinformation source
+filtered_us <- webtracking %>% filter (domain %in% disinformation$url)
 
-#Clean data
-us_webtrack <- us_webtrack %>% 
-  mutate(person_id=substr(person_id, 4, 12))
 
-#Save
-write_csv(us_webtrack, "us_webtrack.csv")
-#Move to 'data' folder
+paths_us <- webtracking %>% filter ( person_id %in% filtered_us$person_id )
+
+
+
+
 
 

@@ -1,5 +1,6 @@
 library(tidyverse)
 
+# first, filter the big dataset df to include only visits to disinformation sites,
 
 
 us_webtrack <- read_csv("data/yougov_webtrack.csv")
@@ -7,7 +8,6 @@ us_webtrack <- read_csv("data/yougov_webtrack.csv")
 
 #finding the ones that are misinformation
 idx <- which( us_webtrack$domain %in% disinformation_domains_clean$url)
-
 
 #joing 
 clean_yougov <- us_webtrack[idx,]
@@ -19,5 +19,6 @@ write_csv(clean_yougov, "misinformation_yougov.csv")
 
 #cleaning fothright now
 load("data/forthright/forthright_webtracking.RData")
+
 
 view(forthright)
