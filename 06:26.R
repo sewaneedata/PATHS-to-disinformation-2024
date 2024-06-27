@@ -53,3 +53,7 @@ us_webtrack <- read_csv("data/yougov_webtrack.csv")
 #Clean data
 us_webtrack <- us_webtrack %>% 
   mutate(person_id=substr(person_id, 4, 12))
+
+#Save
+write_csv(us_webtrack, "us_webtrack.csv")
+#Move to 'data' folder
