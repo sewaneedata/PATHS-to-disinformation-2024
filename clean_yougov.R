@@ -39,7 +39,7 @@ disinformation <- bind_rows(disinformation, wp3_list_alternative_media %>% selec
 #Load webtrackings
 yougov <- load("data/YouGov/webtracking.RData")
 
-#Filter US
+#Filter USa
 webtracking <- webtracking %>% 
   filter(iso2=="US")
 
@@ -57,3 +57,5 @@ us_webtrack <- us_webtrack %>%
 #Save
 write_csv(us_webtrack, "us_webtrack.csv")
 #Move to 'data' folder
+
+
