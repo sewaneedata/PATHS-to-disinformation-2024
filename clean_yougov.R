@@ -48,10 +48,9 @@ webtracking <- webtracking %>%
 filtered_us <- webtracking %>% filter (domain %in% disinformation$url)
 
 
+
 paths_us <- webtracking %>% filter ( person_id %in% filtered_us$person_id )
 
 
-
-
-
-
+write_csv(disinformation, "disinformation.csv")
+write_csv( paths_us, "paths_to_disinformation.csv")
