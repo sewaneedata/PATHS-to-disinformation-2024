@@ -9,7 +9,7 @@ disinformation <- disinformation %>%
 #Checking
 table(disinformation$source)
 
-#Check with W3P media
+#W3P media
 wp3_list_media <- readxl::read_excel("data/LISTS/WP3_list_media.xlsx")
 
 #Clean data
@@ -21,7 +21,7 @@ wp3_list_media <- wp3_list_media %>%
 disinformation <- disinformation %>% 
   filter(!url %in% wp3_list_media$url)
 
-#Import alternative media
+#WP3 alternative media
 wp3_list_alternative_media <- readxl::read_excel("data/LISTS/WP3_list_alternativemedia.xlsx")
 
 #Clean data
@@ -39,14 +39,17 @@ disinformation <- bind_rows(disinformation, wp3_list_alternative_media %>% selec
 #Load webtrackings
 yougov <- load("data/YouGov/webtracking.RData")
 
+#Filter US
 webtracking <- webtracking %>% 
   filter(iso2=="US")
 
 #Save dataset as csv
 write_csv(webtracking, "yougov_webtrack.csv")
+#Put the file just saved in 'data' folder before process to the next step
 
 #Load csv
 us_webtrack <- read_csv("data/yougov_webtrack.csv")
 
+#Clean data
 us_webtrack <- us_webtrack %>% 
   mutate(person_id=substr(person_id, 4, 12))
