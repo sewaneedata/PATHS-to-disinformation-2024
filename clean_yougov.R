@@ -37,7 +37,7 @@ wp3_list_alternative_media <- wp3_list_alternative_media [-idx,]
 disinformation <- bind_rows(disinformation, wp3_list_alternative_media %>% select(url))
 
 #Save disinformation sources
-write_csv(disinformation, "disinformation.csv") #Stop here and move the dataset to 'data' folder
+write_csv(disinformation, "data/disinformation.csv") 
 
 #Load webtrackings
 yougov <- load("data/YouGov/webtracking.RData")
@@ -47,13 +47,12 @@ webtracking <- webtracking %>%
   filter(iso2=="US")
 
 
-# identified misinformation source
+#Identified people that accessed misinformation sources
 filtered_us <- webtracking %>% filter (domain %in% disinformation$url)
 
 
-
+#Identify paths of people visited misinformation sources
 paths_us <- webtracking %>% filter ( person_id %in% filtered_us$person_id )
 
-
-write_csv(disinformation, "disinformation.csv")
-write_csv( paths_us, "paths_to_disinformation.csv")
+#Save data
+write_csv( paths_us, "data/paths_to_disinformation.csv")
