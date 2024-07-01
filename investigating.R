@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 library( tidyverse )
 
 #looking at yougov information 
@@ -56,5 +55,3 @@ print(avg_time_online)
 
 
 
-=======
->>>>>>> parent of c04a6de (commt)
