@@ -77,7 +77,7 @@ explore_forthright %>%
 explore_forthright %>% 
   filter(!is.na(label)) %>% 
   group_by(member_id, slant) %>% 
-  summarise(visits=n()) %>% 
+  summarise(visits=n(), .groups="drop") %>% 
   arrange(desc(visits)) %>% 
   head(1)
 #Using pretty much the same code, also found that there's a person who only visited site (1), but this person is super conservative (10)
@@ -152,7 +152,7 @@ library(readxl)
 screener_data <- read_excel("data/FORTHRIGHT/305021 - Consumer Digital Pilot - Screener Raw Data.xlsx")
 
 explore_forthright <- explore_forthright %>%
-  left_join(screener_data %>% select(member_id, Q9r3, Q12r3, Q12r4), by = "member_id")
+  left_join(screener_data %>% select(member_id, Q8r5, Q9r3, Q12r3, Q12r4), by = "member_id")
 
 #How do you usually discern factually correct information in the media from information that is false? I rely on my gut feeling, and my own knowledge on the subject (5=Always). Results: right=36, neutral=12, left=19
 explore_forthright %>% 
@@ -175,6 +175,12 @@ explore_forthright %>%
 #In your view, to be a good citizen, how important is it for a person to…Be skeptical of what the mainstream media report (5=Very important). Results: right=92, neutral=17, left=29
 explore_forthright %>% 
   filter(Q9r3==5) %>% 
+  group_by(slant) %>% 
+  distinct(member_id) %>% 
+  tally()
+#I have a good knowledge of current affairs and political issues (5=Strongly agree). Results: right=46, neutral=11, left=39
+explore_forthright %>% 
+  filter(Q8r5==5) %>% 
   group_by(slant) %>% 
   distinct(member_id) %>% 
   tally()
