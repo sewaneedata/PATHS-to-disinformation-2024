@@ -40,7 +40,7 @@ yougov_data %>%
 
 # who goes to more sites? who browses more?
 
-web_browse <- yougov_data %>%
+yougov_data %>%
   group_by(slant) %>%
   summarise(unique_subdomains = n_distinct(subdomain, na.rm = TRUE))
 
@@ -67,6 +67,15 @@ View( time_online %>% select( person_id, total_time_online ) %>% distinct() %>%
 # when did it start 
 start_time <- ymd_hms("2022-02-22 00:00:00")
 end_time <- ymd_hms("2022-06-04 23:59:00")
+2023-02-15 08:08:15 - 2023-04-13 14:59:59
+
+start_timeforth <- ymd_hms("2023-02-15 08:08:15")
+end_timeforth <- ymd_hms("2023-04-13 14:59:59")
+
+time_differencef <- end_timeforth - start_timeforth
+as.period(time_differencef)
+
+
 
 time_difference <- end_time - start_time
 as.period(time_difference)
