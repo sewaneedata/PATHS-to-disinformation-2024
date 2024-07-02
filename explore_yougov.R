@@ -10,10 +10,12 @@ yougov_join <- yougov_ideology %>%
 explore_yougov <- classify_yougov %>% 
   left_join(yougov_join, by="person_id")
 
-
-
+# how many people in the data set?? 443
 yougov_ideology %>% 
   summarise(unique_ids = n_distinct(person_id))
 
+# how many people have visited fake news sources?
 explore_yougov %>% 
   summarise(unique_ids = n_distinct(person_id))
+
+
