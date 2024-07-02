@@ -93,10 +93,10 @@ explore_forthright %>%
   group_by(site_name, domain, ref_media, other) %>% 
   tally()
 
-#Top 10 sites get the most visit? dailymail.co.uk--62273 visits (1)
+#Top 10 sites get the most visit? dailymail--62287 visits (1)
 explore_forthright %>% 
   filter(!is.na(label)) %>% 
-  group_by(label, domain, site_name) %>% 
+  group_by(domain) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(10)
@@ -140,7 +140,7 @@ explore_forthright %>%
   filter(slant=="left", label=="fake") %>% 
   group_by(domain) %>% 
   tally()
-#Distribution of type of sites that left affiliation visited? Majority is questionable sources--66102 visits
+#Distribution of type of sites that right affiliation visited? Majority is questionable sources--66102 visits
 explore_forthright %>% 
   filter(slant=="right", !is.na(label)) %>% 
   group_by(label) %>% 
@@ -201,11 +201,47 @@ explore_forthright %>%
   arrange(desc(visits)) %>% 
   head(10)
 
+#Looking at Internal/External efficacy...
 sample <- explore_forthright %>% 
-  distinct(member_id) %>% 
-  select(member_id, Q8r5, Q12r4)
+  filter(!is.na(label)) %>% 
+  group_by(Q8r5, slant) %>% 
+  summarise(visits=n(), .groups="drop") 
+#Plot the data
+ggplot(data=sample, aes(x=Q8r5, y=visits, fill=slant))+
+  geom_col()+
+  labs(x="I have a good knowledge of current affairs and political issues", y="Visits", fill="Political affiliation")
 
+#Top 10 most visited site distribution
+top10 <- explore_forthright %>% 
+  filter(!is.na(label)) %>% 
+  group_by(domain) %>% 
+  #cbsnews has 3 NAs so we have to remove the NAs when we do calculations
+  summarise(total_visits=n(), 
+            left_visits=sum(slant=="left", na.rm=TRUE), 
+            right_visits=sum(slant=="right", na.rm=TRUE), 
+            neutral_visits=sum(slant=="neutral", na.rm=TRUE)) %>%
+  arrange(desc(total_visits)) %>% 
+  head(10)
+#Plot the data
+ggplot( top10 %>% select(-total_visits) %>% pivot_longer( left_visits:neutral_visits ) ) +
+  geom_col( aes(y=domain, x=value, fill=name)  )
 
+#Top 10 sites without top 1
+explore_forthright %>% 
+  filter(!is.na(label), member_id!=6974012) %>% 
+  group_by(domain, site_name, label) %>% 
+  summarise(visits=n()) %>% 
+  arrange(desc(visits)) %>% 
+  head(10)
+
+#Looking at Internal/External efficacy without people with the most visited
+sample1 <- explore_forthright %>% 
+  filter(!is.na(label), ! member_id %in% c(6974012,5491081)) %>% 
+  group_by(Q8r5, slant) %>% 
+  summarise(visits=n(), .groups="drop") 
+ggplot(data=sample1, aes(x=Q8r5, y=visits, fill=slant))+
+  geom_col()+
+  labs(x="I have a good knowledge of current affairs and political issues", y="Visits", fill="Political affiliation")
 
 #Save dataset
 #write_csv(explore_forthright, "data/explore_forthright.csv")
