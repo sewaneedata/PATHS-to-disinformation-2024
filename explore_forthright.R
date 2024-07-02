@@ -73,4 +73,127 @@ explore_forthright %>%
   group_by(domain) %>% 
   tally()
 
+#Who visited disinformation site the most? ---member_id=6974012, visit=62253, right wing
+explore_forthright %>% 
+  filter(!is.na(label)) %>% 
+  group_by(member_id, slant) %>% 
+  summarise(visits=n()) %>% 
+  arrange(desc(visits)) %>% 
+  head(1)
+#Using pretty much the same code, also found that there's a person who only visited site (1), but this person is super conservative (10)
 
+#Where did this person go? Majority is questionable sources--61415 visits
+explore_forthright %>% 
+  filter(member_id==6974012) %>% 
+  group_by(label) %>% 
+  tally()
+#What sites? Majority is dailymail.co.uk--60934 visits
+explore_forthright %>% 
+  filter(member_id==6974012, label=="questionable sources") %>% 
+  group_by(site_name, domain, ref_media, other) %>% 
+  tally()
+
+#Top 10 sites get the most visit? dailymail.co.uk--62273 visits (1)
+explore_forthright %>% 
+  filter(!is.na(label)) %>% 
+  group_by(label, domain, site_name) %>% 
+  summarise(visits=n()) %>% 
+  arrange(desc(visits)) %>% 
+  head(10)
+
+#Distribution of type of sites that neutral affiliation visited? Majority of them visit right bias sites--1219
+explore_forthright %>% 
+  filter(slant=="neutral", !is.na(label)) %>% 
+  group_by(label) %>% 
+  tally()
+#Where did they go? Majority is rd.com--471 visits
+explore_forthright %>% 
+  filter(slant=="neutral", label=="right bias") %>% 
+  group_by(domain, site_name) %>% 
+  summarise(visits=n()) %>% 
+  arrange(desc(visits))
+
+#Who visit disinformation site the most in left wing? --member_id=5491081, visits=13869
+explore_forthright %>% 
+  filter(!is.na(label), slant=="left") %>% 
+  group_by(member_id) %>% 
+  summarise(visits=n()) %>% 
+  arrange(desc(visits)) %>% 
+  head(1)
+#Comparing: the person from right wing visits dis site 4x more than this one
+
+#Where did this person go? --democraticunderground.com, visits=13845
+explore_forthright %>% 
+  filter(member_id==5491081, !is.na(label)) %>% 
+  group_by(label, domain, site_name) %>% 
+  summarise(visits=n()) %>% 
+  arrange(desc(visits)) %>% 
+  head(10)
+
+#Distribution of type of sites that left affiliation visited? Majority is fake--14648 visits
+explore_forthright %>% 
+  filter(slant=="left", !is.na(label)) %>% 
+  group_by(label) %>% 
+  tally()
+#Where they go? democraticunderground--13851 visits
+explore_forthright %>% 
+  filter(slant=="left", label=="fake") %>% 
+  group_by(domain) %>% 
+  tally()
+#Distribution of type of sites that left affiliation visited? Majority is fake--66102 visits
+explore_forthright %>% 
+  filter(slant=="right", !is.na(label)) %>% 
+  group_by(label) %>% 
+  tally()
+
+##Experiment more-----------------------------
+#install.packages('readxl')
+library(readxl)
+screener_data <- read_excel("data/FORTHRIGHT/305021 - Consumer Digital Pilot - Screener Raw Data.xlsx")
+
+explore_forthright <- explore_forthright %>%
+  left_join(screener_data %>% select(member_id, Q9r3, Q12r3, Q12r4), by = "member_id")
+
+#How do you usually discern factually correct information in the media from information that is false? I rely on my gut feeling, and my own knowledge on the subject (5=Always). Results: right=36, neutral=12, left=19
+explore_forthright %>% 
+  filter(Q12r4==5) %>% 
+  group_by(slant) %>% 
+  distinct(member_id) %>% 
+  tally()
+#How do you usually discern factually correct information in the media from information that is false? I consult fact-checking websites in case of doubt (5=Always). Results: right=17, neutral=9, left=30
+explore_forthright %>% 
+  filter(Q12r3==5) %>% 
+  group_by(slant) %>% 
+  distinct(member_id) %>% 
+  tally()
+#How do you usually discern factually correct information in the media from information that is false? I consult fact-checking websites in case of doubt (5=Always). Results: right=44, neutral=20, left=16
+explore_forthright %>% 
+  filter(Q12r3==1) %>% 
+  group_by(slant) %>% 
+  distinct(member_id) %>% 
+  tally()
+#In your view, to be a good citizen, how important is it for a person to…Be skeptical of what the mainstream media report (5=Very important). Results: right=92, neutral=17, left=29
+explore_forthright %>% 
+  filter(Q9r3==5) %>% 
+  group_by(slant) %>% 
+  distinct(member_id) %>% 
+  tally()
+
+#People who think it's very important to be skeptical and the site they visited
+explore_forthright %>% 
+  filter(Q9r3==5, slant=="right", !is.na(label)) %>% 
+  group_by(member_id, domain, label) %>% 
+  summarise(visits=n()) %>% 
+  arrange(desc(visits)) %>% 
+  head(10)
+
+#People who always consult fact-checking websites in case of doubts and the site they visited
+explore_forthright %>% 
+  filter(Q12r3==5, slant=="right", !is.na(label)) %>% 
+  group_by(member_id, domain, label) %>% 
+  summarise(visits=n()) %>% 
+  arrange(desc(visits)) %>% 
+  head(10)
+
+#Save dataset
+write_csv(explore_forthright, "data/explore_forthright.csv")
