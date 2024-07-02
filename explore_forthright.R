@@ -140,7 +140,7 @@ explore_forthright %>%
   filter(slant=="left", label=="fake") %>% 
   group_by(domain) %>% 
   tally()
-#Distribution of type of sites that left affiliation visited? Majority is fake--66102 visits
+#Distribution of type of sites that left affiliation visited? Majority is questionable sources--66102 visits
 explore_forthright %>% 
   filter(slant=="right", !is.na(label)) %>% 
   group_by(label) %>% 
@@ -187,19 +187,25 @@ explore_forthright %>%
 
 #People who think it's very important to be skeptical and the site they visited
 explore_forthright %>% 
-  filter(Q9r3==5, slant=="right", !is.na(label)) %>% 
-  group_by(member_id, domain, label) %>% 
+  filter(Q9r3==5, !is.na(label)) %>% 
+  group_by(member_id, domain, label, slant) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(10)
 
 #People who always consult fact-checking websites in case of doubts and the site they visited
 explore_forthright %>% 
-  filter(Q12r3==5, slant=="right", !is.na(label)) %>% 
-  group_by(member_id, domain, label) %>% 
+  filter(Q12r3==5, !is.na(label)) %>% 
+  group_by(member_id, domain, label, slant) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(10)
 
+sample <- explore_forthright %>% 
+  distinct(member_id) %>% 
+  select(member_id, Q8r5, Q12r4)
+
+
+
 #Save dataset
-write_csv(explore_forthright, "data/explore_forthright.csv")
+#write_csv(explore_forthright, "data/explore_forthright.csv")
