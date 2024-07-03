@@ -1,5 +1,6 @@
 #This script is for making a descriptive table
 
+####PEOPLE------
 #Load library
 library(tidyverse)
 
@@ -177,5 +178,17 @@ kbl(table_df, caption = 'Descriptive Table') %>%
   pack_rows('Interest in economy, business and financial news', 77, 81) %>% 
   kable_minimal()
 
+#Gender + Political
+ggplot(explore_survey, aes(x=Q26, fill=slant, na.rm=TRUE))+
+  geom_bar()+
+  labs(x="Gender", fill="Political affiliation", title="Distribution of political affiliation among gender")
 
+####WEBSITES-----
+#Import dataset
+load("data/explore_forthright.RData")
 
+#Disinformation websites
+dis_sites <- explore_forthright %>% 
+  filter(!is.na(label)) %>% 
+  group_by(label) %>%
+  summarise(visits=n(), num_sites=n_distinct(domain))
