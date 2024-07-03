@@ -17,7 +17,7 @@ merged_data <- webtracking %>%
   left_join(survey_info %>% select(person_id, q12_ideology), by = "person_id")
 
 
-# Select the necessary columns, including the q13 colum
+# Select the necessary columns, including the q12 colum
 
 
 yougov_ideology <- merged_data %>%
