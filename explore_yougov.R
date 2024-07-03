@@ -97,7 +97,7 @@ explore_yougov %>%
   head(1)
 
 # Distribution of site types visited by left affiliation
-explore_yougov %>% 
+explore_yougov %>% ``
   filter(slant == "left", !is.na(label)) %>% 
   group_by(label) %>% 
   tally()
@@ -159,7 +159,7 @@ ggplot(proportion_data, aes(x = "", y = count, fill = category)) +
 
 # Plot 3: Political Affiliation Counts
 plot_data_affiliation <- yougov_ideology %>%
-  filter(slant %in% c("left", "right", "neutral")) %>%
+  filter(slant %in% c("left", "right", "neutral", "na")) %>%
   group_by(slant) %>%
   summarise(count = n_distinct(person_id))
 
@@ -169,7 +169,7 @@ ggplot(plot_data_affiliation, aes(x = slant, y = count, fill = slant)) +
        x = "Affiliation", 
        y = "Number of People") +
   theme_minimal() +
-  scale_fill_manual(values = c("left" = "blue", "right" = "red", "neutral" = "grey")) +
+  scale_fill_manual(values = c("left" = "blue", "right" = "red", "neutral" = "grey", "na" = 'black')) +
   geom_text(aes(label = count), vjust = -0.5)
 
 # Plot 4: Visits by Political Affiliation
@@ -186,5 +186,3 @@ ggplot(plot_data_visits, aes(x = slant, y = count, fill = slant)) +
   theme_minimal() +
   scale_fill_manual(values = c("left" = "blue", "right" = "red", "neutral" = "grey")) +
   geom_text(aes(label = count), vjust = -0.5)
-
-2023-02-15 08:08:15
