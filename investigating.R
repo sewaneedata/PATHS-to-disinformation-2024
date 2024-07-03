@@ -34,18 +34,56 @@ yougov_data %>%
 
 # 53 people who have netural political affilation
 
-
-# who spend more time online? right or left leaning people?
-library(lubridate)
-
-
 yougov_data %>% 
   group_by(slant) %>% 
-  summarise(total_page_duration_min = minute(sum(page_duration, na.rm = TRUE)))
+  summarise(unique_person_ids = n_distinct(person_id))
+
+# who goes to more sites? who browses more?
+
+yougov_data %>%
+  group_by(slant) %>%
+  summarise(unique_subdomains = n_distinct(subdomain, na.rm = TRUE))
+
+ggplot( data = )
+
+# who spend more time online? right or left leaning people?
+
+time_online <- yougov_data %>% 
+  group_by(person_id) %>% 
+  mutate(total_time_online = sum(page_duration, na.rm = TRUE)) 
+
+time_online %>% 
+  filter( total_time_online < 4320000 ) %>% 
+  ggplot( ) + geom_boxplot( aes(x=slant, y = total_time_online/3600 )) 
+
+# find persons who spent the most amout of time online 
+View( time_online %>% select( person_id, total_time_online ) %>% distinct() %>% 
+        arrange( desc(total_time_online)) )
+
+
+# summarise( stats = list( summary( total_time_online / 3600 ) ) ) %>%
+# unnest_wider( stats )
+
+# when did it start 
+start_time <- ymd_hms("2022-02-22 00:00:00")
+end_time <- ymd_hms("2022-06-04 23:59:00")
+2023-02-15 08:08:15 - 2023-04-13 14:59:59
+
+start_timeforth <- ymd_hms("2023-02-15 08:08:15")
+end_timeforth <- ymd_hms("2023-04-13 14:59:59")
+
+time_differencef <- end_timeforth - start_timeforth
+as.period(time_differencef)
+
+
+
+time_difference <- end_time - start_time
+as.period(time_difference)
+
 
 print(avg_time_online)
 
-
+# 103 days 
 
 
 
