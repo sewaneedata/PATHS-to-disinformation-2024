@@ -6,7 +6,7 @@ library(urltools)
 disinformation <- read_csv("data/disinformation.csv")
 
 #Load forthright (long)
-forthright <- load("data/FORTHRIGHT/forthright_webtracking_nicole.RData")
+load("data/FORTHRIGHT/forthright_webtracking_nicole.RData")
 
 #####OLD BUT GOLD-----
 #Separate the domain and its suffix

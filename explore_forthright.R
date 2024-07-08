@@ -13,6 +13,13 @@ forthright_join <- forthright_ideology %>%
 explore_forthright <- forthright_label %>% 
   left_join(forthright_join, by="member_id")
 
+#Identify and remove unnecessary
+#We remove those visits disinformation sites that are less than 4 seconds because that mean they didn't really visit the site
+explore_forthright <- explore_forthright %>% 
+  filter(!is.na(label), duration_seconds > 4) %>% 
+  bind_rows(explore_forthright %>% filter (is.na(label)))
+
+
 ##Explore dataset----------
 #Observations = 584
 forthright_ideology %>% 
@@ -61,24 +68,13 @@ explore_forthright %>%
 
 75/144*100 #52.08333% of people who are neutral visit untrustworthy sites
 
-#Finding this weird guy--political is NA, member_id=4433402
-explore_forthright %>% 
-  group_by(member_id, slant) %>%
-  filter(!slant %in% c("left","right","neutral")) %>% 
-  distinct(member_id) %>% 
-  tally ()
-#This guy only browse on fake source 3 times (cbsnews)
-explore_forthright %>% 
-  filter (member_id==4433402, label=="fake") %>% 
-  group_by(domain) %>% 
-  tally()
-
 #Who has the most visits in this dataset? ---member_id=4723361, visit=705275, right wing
 forthright_ideology %>% 
   group_by(member_id, slant) %>% 
   summarise(visits=n(), .groups="drop") %>% 
   arrange(desc(visits)) %>% 
   head(1)
+
 #Where does this person go the most? ---skeepers, visit=572481
 forthright_ideology %>% 
   filter(member_id==4723361) %>% 
@@ -87,7 +83,7 @@ forthright_ideology %>%
   arrange(desc(visits)) %>% 
   head(1)
 
-#Who visited disinformation site the most? ---member_id=6974012, visit=62750, right wing
+#Who visited disinformation site the most? ---member_id=5491081, visit=8288, left wing
 explore_forthright %>% 
   filter(!is.na(label)) %>% 
   group_by(member_id, slant) %>% 
@@ -96,18 +92,18 @@ explore_forthright %>%
   head(1)
 #Using pretty much the same code, also found that there's a person who only visited site (1), but this person is super conservative (10)
 
-#Where did this person go? Majority is questionable sources--61415 visits
+#Where did this person go? Majority is fake--8288 visits
 explore_forthright %>% 
-  filter(member_id==6974012) %>% 
+  filter(member_id==5491081) %>% 
   group_by(label) %>% 
   tally()
-#What sites? Majority is dailymail.co.uk--60934 visits
+#What sites? Majority is democraticunderground.com--8288 visits
 explore_forthright %>% 
-  filter(member_id==6974012, label=="questionable sources") %>% 
+  filter(member_id==5491081, label=="fake") %>% 
   group_by(site_name, domain, ref_media, other) %>% 
   tally()
 
-#Top 10 sites get the most visit? dailymail--62273 visits (1)
+#Top 10 sites get the most visit? democraticunderground.com--8288 visits (1)
 explore_forthright %>% 
   filter(!is.na(label)) %>% 
   group_by(domain) %>% 
@@ -115,30 +111,29 @@ explore_forthright %>%
   arrange(desc(visits)) %>% 
   head(10)
 
-#Distribution of type of sites that neutral affiliation visited? Majority of them visit left bias sites--1350
+#Distribution of type of sites that neutral affiliation visited? Majority of them visit left bias sites--1145
 explore_forthright %>% 
   filter(slant=="Neutral", !is.na(label)) %>% 
   group_by(label) %>% 
   tally()
-#Where did they go? Majority is cnn.com--694 visits
+#Where did they go? Majority is cnn.com--568 visits
 explore_forthright %>% 
   filter(slant=="Neutral", label=="left bias") %>% 
   group_by(domain, site_name) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits))
 
-#Who visit disinformation site the most in left wing? --member_id=5491081, visits=13851
+#Who visit disinformation site the most in right wing? --member_id=6974012, visits=8003
 explore_forthright %>% 
-  filter(!is.na(label), slant=="Left wing") %>% 
+  filter(!is.na(label), slant=="Right wing") %>% 
   group_by(member_id) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(1)
-#Comparing: the person from right wing visits dis site 4x more than this one (?)
 
-#Where did this person go? --democraticunderground.com, visits=13845
+#Where did this person go? --dailymail.co.uk, visits=6483
 explore_forthright %>% 
-  filter(member_id==5491081, !is.na(label)) %>% 
+  filter(member_id==6974012, !is.na(label)) %>% 
   group_by(label, domain, site_name) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
@@ -224,14 +219,6 @@ top10 <- explore_forthright %>%
 ggplot( top10 %>% select(-total_visits) %>% pivot_longer( left_visits:neutral_visits ) ) +
   geom_col( aes(y=domain, x=value, fill=name)  )
 
-#Top 10 sites without top 1
-explore_forthright %>% 
-  filter(!is.na(label), member_id!=6974012) %>% 
-  group_by(domain, site_name, label) %>% 
-  summarise(visits=n()) %>% 
-  arrange(desc(visits)) %>% 
-  head(10)
-
 #Looking at Internal/External efficacy without people with the most visited
 sample1 <- explore_forthright %>% 
   filter(!is.na(label), ! member_id %in% c(6974012,5491081)) %>% 
@@ -307,7 +294,6 @@ member_demos <- read_excel("data/FORTHRIGHT/305021_Member_Demos.xlsx")
 explore_survey <- explore_survey %>% 
   left_join(member_demos %>% select(member_id, race_id), by="member_id")
 
-#Make descriptive table
 
 #Save dataset
 save(explore_forthright, file="data/explore_forthright.RData")
