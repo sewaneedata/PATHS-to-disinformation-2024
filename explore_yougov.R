@@ -10,8 +10,9 @@ yougov_join <- yougov_ideology %>%
 explore_yougov <- classify_yougov %>% 
   left_join(yougov_join, by="person_id")
 
-# how many people in the data set?? 443
+# how many people in the data set?? 370
 total_people <- yougov_ideology %>% 
+  filter(!is.na( slant)) %>% 
   summarise(unique_ids = n_distinct(person_id)) %>% 
   pull(unique_ids)
 total_people
@@ -19,6 +20,7 @@ total_people
 
 # how many people have visited fake news sources?
 fake_news_visitors <- explore_yougov %>% 
+  filter(!is.na( slant)) %>% 
   summarise(unique_ids = n_distinct(person_id)) %>% 
   pull(unique_ids)
 fake_news_visitors
@@ -186,3 +188,40 @@ ggplot(plot_data_visits, aes(x = slant, y = count, fill = slant)) +
   theme_minimal() +
   scale_fill_manual(values = c("left" = "blue", "right" = "red", "neutral" = "grey")) +
   geom_text(aes(label = count), vjust = -0.5)
+
+
+
+
+
+
+
+
+
+########################################################################################
+# 7/8/24 gabe update
+########################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
