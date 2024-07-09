@@ -27,32 +27,32 @@ table(yougov_label$label)
 #Import
 forthright <- load("data/paths_us_forthright.RData")
 
-
-#Separate the domain and its suffix
-decomp <- suffix_extract( disinformation$domain )
-
-disinformation2 <- disinformation %>% 
-  mutate( domain = ifelse( !is.na(decomp$domain), decomp$domain, domain ) ) %>% 
-  select(-source, -last_update, -harm_score, -type) %>%
-  distinct() 
-
-# find duplicated sites in disinformation2
-duplicated_domains <- disinformation2 %>%
-  group_by(domain) %>% 
-  tally() %>% 
-  filter( n > 1 ) %>%
-  pull( domain )
-
-disinformation2_no_duplicates <- disinformation2 %>%
-  filter( ! domain %in% duplicated_domains )
-
-disinformation2_duplicates <- disinformation2 %>%
-  filter( domain %in% duplicated_domains ) %>%
-  arrange( domain )
+#OLD BUT GOLD
+# #Separate the domain and its suffix
+# decomp <- suffix_extract( disinformation$domain )
+# 
+# disinformation2 <- disinformation %>% 
+#   mutate( domain = ifelse( !is.na(decomp$domain), decomp$domain, domain ) ) %>% 
+#   select(-source, -last_update, -harm_score, -type) %>%
+#   distinct() 
+# 
+# # find duplicated sites in disinformation2
+# duplicated_domains <- disinformation2 %>%
+#   group_by(domain) %>% 
+#   tally() %>% 
+#   filter( n > 1 ) %>%
+#   pull( domain )
+# 
+# disinformation2_no_duplicates <- disinformation2 %>%
+#   filter( ! domain %in% duplicated_domains )
+# 
+# disinformation2_duplicates <- disinformation2 %>%
+#   filter( domain %in% duplicated_domains ) %>%
+#   arrange( domain )
 
 #Join label
 forthright_label <- paths_us_forthright %>% 
-  left_join(disinformation2_no_duplicates, by="domain")
+  left_join(disinformation %>% select(label, domain), by="domain")
 
 #Check
 table(forthright_label$label)

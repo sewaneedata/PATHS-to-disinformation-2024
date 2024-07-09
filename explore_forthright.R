@@ -13,65 +13,60 @@ forthright_join <- forthright_ideology %>%
 explore_forthright <- forthright_label %>% 
   left_join(forthright_join, by="member_id")
 
+#Identify and remove unnecessary
+#We remove those visits disinformation sites that are less than 4 seconds because that mean they didn't really visit the site
+explore_forthright <- explore_forthright %>% 
+  filter(!is.na(label), duration_seconds > 4) %>% 
+  bind_rows(explore_forthright %>% filter (is.na(label)))
+
+
 ##Explore dataset----------
 #Observations = 584
 forthright_ideology %>% 
   summarise(unique_ids = n_distinct(member_id))
 
-#People who visited untrustworthy sites = 410
+#People who visited untrustworthy sites = 338
 explore_forthright %>% 
   summarise(unique_ids = n_distinct(member_id))
 
-410/584*100 #70.2% of the observations visit these sites
+338/584*100 #57.87671% of the observations visit these sites
 
 #Political affiliation
-#Total left = 207 (35.4% of 584)
+#Total left = 207
 forthright_ideology %>% 
-  filter(slant=='left') %>% 
+  filter(slant=='Left wing') %>% 
   summarise(unique_ids = n_distinct(member_id))
 
-#Left visits = 146 (35.6% of 410)
+#Left visits = 123
 explore_forthright %>% 
-  filter(slant=='left') %>% 
+  filter(slant=='Left wing') %>% 
   summarise(unique_ids = n_distinct(member_id))
 
-146/207*100 #70.5% of people from left wing visit untrustworthy sites
+123/207*100 #59.42029% of people from left wing visit untrustworthy sites
 
-#Total right = 231 (39.55% of 584)
+#Total right = 231
 forthright_ideology %>% 
-  filter(slant=='right') %>% 
+  filter(slant=='Right wing') %>% 
   summarise(unique_ids = n_distinct(member_id))
 
-#Right visits = 170 (41.46% of 410)
+#Right visits = 140
 explore_forthright %>% 
-  filter(slant=='right') %>% 
+  filter(slant=='Right wing') %>% 
   summarise(unique_ids = n_distinct(member_id))
 
-170/231*100 #73.59% of people from right wing visit untrustworthy sites
+140/231*100 #60.60606% of people from right wing visit untrustworthy sites
 
-#Total neutral = 144 (24.7% of 584)
+#Total neutral = 144
 forthright_ideology %>% 
-  filter(slant=='neutral') %>% 
+  filter(slant=='Neutral') %>% 
   summarise(unique_ids = n_distinct(member_id))
 
-#Neutral visits = 93 (22.68% of 410)
+#Neutral visits = 75
 explore_forthright %>% 
-  filter(slant=='neutral') %>% 
+  filter(slant=='Neutral') %>% 
   summarise(unique_ids = n_distinct(member_id))
 
-93/144*100 #64.58% of people who are neutral visit untrustworthy sites
-
-#Finding this weird guy--political is NA, member_id=4433402
-explore_forthright %>% 
-  group_by(member_id, slant) %>%
-  filter(!slant %in% c("left","right","neutral")) %>% 
-  distinct(member_id) %>% 
-  tally ()
-#This guy only browse on fake source 3 times (cbsnews)
-explore_forthright %>% 
-  filter (member_id==4433402, label=="fake") %>% 
-  group_by(domain) %>% 
-  tally()
+75/144*100 #52.08333% of people who are neutral visit untrustworthy sites
 
 #Who has the most visits in this dataset? ---member_id=4723361, visit=705275, right wing
 forthright_ideology %>% 
@@ -79,6 +74,7 @@ forthright_ideology %>%
   summarise(visits=n(), .groups="drop") %>% 
   arrange(desc(visits)) %>% 
   head(1)
+
 #Where does this person go the most? ---skeepers, visit=572481
 forthright_ideology %>% 
   filter(member_id==4723361) %>% 
@@ -87,7 +83,7 @@ forthright_ideology %>%
   arrange(desc(visits)) %>% 
   head(1)
 
-#Who visited disinformation site the most? ---member_id=6974012, visit=62253, right wing
+#Who visited disinformation site the most? ---member_id=5491081, visit=8288, left wing
 explore_forthright %>% 
   filter(!is.na(label)) %>% 
   group_by(member_id, slant) %>% 
@@ -96,18 +92,18 @@ explore_forthright %>%
   head(1)
 #Using pretty much the same code, also found that there's a person who only visited site (1), but this person is super conservative (10)
 
-#Where did this person go? Majority is questionable sources--61415 visits
+#Where did this person go? Majority is fake--8288 visits
 explore_forthright %>% 
-  filter(member_id==6974012) %>% 
+  filter(member_id==5491081) %>% 
   group_by(label) %>% 
   tally()
-#What sites? Majority is dailymail.co.uk--60934 visits
+#What sites? Majority is democraticunderground.com--8288 visits
 explore_forthright %>% 
-  filter(member_id==6974012, label=="questionable sources") %>% 
+  filter(member_id==5491081, label=="fake") %>% 
   group_by(site_name, domain, ref_media, other) %>% 
   tally()
 
-#Top 10 sites get the most visit? dailymail--62287 visits (1)
+#Top 10 sites get the most visit? democraticunderground.com--8288 visits (1)
 explore_forthright %>% 
   filter(!is.na(label)) %>% 
   group_by(domain) %>% 
@@ -115,50 +111,33 @@ explore_forthright %>%
   arrange(desc(visits)) %>% 
   head(10)
 
-#Distribution of type of sites that neutral affiliation visited? Majority of them visit right bias sites--1219
+#Distribution of type of sites that neutral affiliation visited? Majority of them visit left bias sites--1145
 explore_forthright %>% 
-  filter(slant=="neutral", !is.na(label)) %>% 
+  filter(slant=="Neutral", !is.na(label)) %>% 
   group_by(label) %>% 
   tally()
-#Where did they go? Majority is rd.com--471 visits
+#Where did they go? Majority is cnn.com--568 visits
 explore_forthright %>% 
-  filter(slant=="neutral", label=="right bias") %>% 
+  filter(slant=="Neutral", label=="left bias") %>% 
   group_by(domain, site_name) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits))
 
-#Who visit disinformation site the most in left wing? --member_id=5491081, visits=13869
+#Who visit disinformation site the most in right wing? --member_id=6974012, visits=8003
 explore_forthright %>% 
-  filter(!is.na(label), slant=="left") %>% 
+  filter(!is.na(label), slant=="Right wing") %>% 
   group_by(member_id) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(1)
-#Comparing: the person from right wing visits dis site 4x more than this one
 
-#Where did this person go? --democraticunderground.com, visits=13845
+#Where did this person go? --dailymail.co.uk, visits=6483
 explore_forthright %>% 
-  filter(member_id==5491081, !is.na(label)) %>% 
+  filter(member_id==6974012, !is.na(label)) %>% 
   group_by(label, domain, site_name) %>% 
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(10)
-
-#Distribution of type of sites that left affiliation visited? Majority is fake--14648 visits
-explore_forthright %>% 
-  filter(slant=="left", !is.na(label)) %>% 
-  group_by(label) %>% 
-  tally()
-#Where they go? democraticunderground--13851 visits
-explore_forthright %>% 
-  filter(slant=="left", label=="fake") %>% 
-  group_by(domain) %>% 
-  tally()
-#Distribution of type of sites that right affiliation visited? Majority is questionable sources--66102 visits
-explore_forthright %>% 
-  filter(slant=="right", !is.na(label)) %>% 
-  group_by(label) %>% 
-  tally()
 
 ##Experiment more-----------------------------
 #install.packages('readxl')
@@ -168,31 +147,31 @@ screener_data <- read_excel("data/FORTHRIGHT/305021 - Consumer Digital Pilot - S
 explore_forthright <- explore_forthright %>%
   left_join(screener_data %>% select(member_id, Q8r5, Q9r3, Q12r3, Q12r4), by = "member_id")
 
-#How do you usually discern factually correct information in the media from information that is false? I rely on my gut feeling, and my own knowledge on the subject (5=Always). Results: right=36, neutral=12, left=19
+#How do you usually discern factually correct information in the media from information that is false? I rely on my gut feeling, and my own knowledge on the subject (5=Always). Results: right=30, neutral=11, left=17
 explore_forthright %>% 
   filter(Q12r4==5) %>% 
   group_by(slant) %>% 
   distinct(member_id) %>% 
   tally()
-#How do you usually discern factually correct information in the media from information that is false? I consult fact-checking websites in case of doubt (5=Always). Results: right=17, neutral=9, left=30
+#How do you usually discern factually correct information in the media from information that is false? I consult fact-checking websites in case of doubt (5=Always). Results: right=12, neutral=7, left=26
 explore_forthright %>% 
   filter(Q12r3==5) %>% 
   group_by(slant) %>% 
   distinct(member_id) %>% 
   tally()
-#How do you usually discern factually correct information in the media from information that is false? I consult fact-checking websites in case of doubt (5=Always). Results: right=44, neutral=20, left=16
+#How do you usually discern factually correct information in the media from information that is false? I consult fact-checking websites in case of doubt (5=Always). Results: right=39, neutral=14, left=12
 explore_forthright %>% 
   filter(Q12r3==1) %>% 
   group_by(slant) %>% 
   distinct(member_id) %>% 
   tally()
-#In your view, to be a good citizen, how important is it for a person to…Be skeptical of what the mainstream media report (5=Very important). Results: right=92, neutral=17, left=29
+#In your view, to be a good citizen, how important is it for a person to…Be skeptical of what the mainstream media report (5=Very important). Results: right=79, neutral=14, left=26
 explore_forthright %>% 
   filter(Q9r3==5) %>% 
   group_by(slant) %>% 
   distinct(member_id) %>% 
   tally()
-#I have a good knowledge of current affairs and political issues (5=Strongly agree). Results: right=46, neutral=11, left=39
+#I have a good knowledge of current affairs and political issues (5=Strongly agree). Results: right=33, neutral=9, left=32
 explore_forthright %>% 
   filter(Q8r5==5) %>% 
   group_by(slant) %>% 
@@ -231,22 +210,14 @@ top10 <- explore_forthright %>%
   group_by(domain) %>% 
   #cbsnews has 3 NAs so we have to remove the NAs when we do calculations
   summarise(total_visits=n(), 
-            left_visits=sum(slant=="left", na.rm=TRUE), 
-            right_visits=sum(slant=="right", na.rm=TRUE), 
-            neutral_visits=sum(slant=="neutral", na.rm=TRUE)) %>%
+            left_visits=sum(slant=="Left wing", na.rm=TRUE), 
+            right_visits=sum(slant=="Right wing", na.rm=TRUE), 
+            neutral_visits=sum(slant=="Neutral", na.rm=TRUE)) %>%
   arrange(desc(total_visits)) %>% 
   head(10)
 #Plot the data
 ggplot( top10 %>% select(-total_visits) %>% pivot_longer( left_visits:neutral_visits ) ) +
   geom_col( aes(y=domain, x=value, fill=name)  )
-
-#Top 10 sites without top 1
-explore_forthright %>% 
-  filter(!is.na(label), member_id!=6974012) %>% 
-  group_by(domain, site_name, label) %>% 
-  summarise(visits=n()) %>% 
-  arrange(desc(visits)) %>% 
-  head(10)
 
 #Looking at Internal/External efficacy without people with the most visited
 sample1 <- explore_forthright %>% 
@@ -276,7 +247,8 @@ explore_survey <- forthright_ideology %>%
   distinct()
 explore_survey <- explore_survey %>% 
   left_join(screener_data %>% 
-              select(member_id, 
+              select(member_id,
+                     Q28, #Household income
                      Q25, #Birth year
                      QAGE, #Age group
                      Q26, #Gender
@@ -300,22 +272,22 @@ explore_survey %>%
   summarise(mean_age = mean(age, na.rm = TRUE)) #People visited disinformation sites--50.73839
 
 #Gender?
-table(explore_survey$Q26) #Big: male=281, female=295, non-binary=6
+table(explore_survey$Q26) 
 explore_survey %>%
   filter(dis == 1) %>%
-  group_by(Q26) %>% tally() #Dis: male=205, female=199, non-binary=5
+  group_by(Q26) %>% tally() 
 
 #Distribution of age group?
-table(explore_survey$QAGE) #Big: majority are 2(18-34, 149) and 6(65+, 122)
+table(explore_survey$QAGE) 
 explore_survey %>%
   filter(dis == 1) %>%
-  group_by(QAGE) %>% tally() #Dis: 2(102), 6(91)
+  group_by(QAGE) %>% tally() 
 
 #Education level?
-table(explore_survey$Q27) #Big: Majority are 6 (Bachelor's degree, 179) and 3 (Some college credit, no degree, 103)
+table(explore_survey$Q27) 
 explore_survey %>%
   filter(dis == 1) %>%
-  group_by(Q27) %>% tally() #Dis: 2(137), 6(70)
+  group_by(Q27) %>% tally() 
 
 #Import dataset
 member_demos <- read_excel("data/FORTHRIGHT/305021_Member_Demos.xlsx")
@@ -324,4 +296,5 @@ explore_survey <- explore_survey %>%
 
 
 #Save dataset
-#write_csv(explore_forthright, "data/explore_forthright.csv")
+save(explore_forthright, file="data/explore_forthright.RData")
+write_csv(explore_survey, "data/forthright_survey.csv")
