@@ -19,7 +19,7 @@ total_people
 
 # how many people have visited fake news sources? - 333
 fake_news_visitors <- explore_yougov %>% 
-  filter(!is.na( slant)) %>% 
+  filter(!is.na( slant)) %>%
   summarise(unique_ids = n_distinct(person_id)) %>% 
   pull(unique_ids)
 fake_news_visitors

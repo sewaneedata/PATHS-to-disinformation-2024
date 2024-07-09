@@ -6,18 +6,18 @@ library(urltools)
 
 #Import files
 disinformation <- read_csv("data/disinformation.csv")
-yougov <- read_csv("data/paths_to_disinformation.csv")
+paths_to_disinformation <- read_csv("data/paths_to_disinformation.csv")
 
 #Rename
-names(disinformation) <- c("domain", #url 
+names(disinformation) <- c("extension", #url 
                            "label", 
                            "source", 
                            "last_update", 
                            "harm_score", 
                            "type" )
 #Join label
-yougov_label <- yougov %>% 
-  left_join(disinformation, by="domain") %>% 
+yougov_label <- paths_to_disinformation %>% 
+  left_join(disinformation, by="extension") %>% 
   select(-source, -last_update, -harm_score, -type)
 
 #Check
