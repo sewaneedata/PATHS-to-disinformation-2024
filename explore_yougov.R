@@ -9,7 +9,7 @@ yougov_join <- yougov_ideology %>%
 explore_yougov <- classify_yougov %>% 
   left_join(yougov_join, by="person_id")
 
-# how many people in the data set?? 370
+# how many people in the data set?? 370, 1:49 - 450
 total_people <- yougov_ideology %>% 
   filter(!is.na( slant)) %>% 
   summarise(unique_ids = n_distinct(person_id)) %>% 
@@ -17,7 +17,7 @@ total_people <- yougov_ideology %>%
 total_people
 
 
-# how many people have visited fake news sources?
+# how many people have visited fake news sources? - 333
 fake_news_visitors <- explore_yougov %>% 
   filter(!is.na( slant)) %>% 
   summarise(unique_ids = n_distinct(person_id)) %>% 
@@ -141,6 +141,8 @@ explore_yougov %>%
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(10)
+
+
 
 
 
