@@ -20,10 +20,9 @@ total_people
 # how many people have visited fake news sources? - 333
 fake_news_visitors <- explore_yougov %>% 
   filter(!is.na( slant)) %>%
-  filter(label == 'fake' & page_duration > 6) %>% 
-  summarise(unique_ids = n_distinct(person_id)) %>% 
-  pull(unique_ids)
-
+  filter(page_duration > 8) %>% 
+  summarise(unique_ids = n_distinct(person_id))
+  
 fake_news_visitors
 
 
@@ -106,7 +105,8 @@ explore_yougov %>%
 explore_yougov %>% 
   filter(!is.na(label)) %>% 
   group_by(label) %>% 
-  tally()
+  tally() %>% 
+  arrange(desc(n))
 
 
 
@@ -154,10 +154,10 @@ explore_yougov %>%
 
 
 
-##Experiment more-----------------------------
+##Experiment more ignore for right now-----------------------------
 #install.packages('readxl')
 library(readxl)
-screener_data <- read_excel("data/FORTHRIGHT/305021 - Consumer Digital Pilot - Screener Raw Data.xlsx")
+screener_data <- read_excel("data//305021 - Consumer Digital Pilot - Screener Raw Data.xlsx")
 
 explore_forthright <- explore_forthright %>%
   left_join(screener_data %>% select(member_id, Q8r5, Q9r3, Q12r3, Q12r4), by = "member_id")
@@ -315,7 +315,7 @@ save(explore_forthright, file="data/explore_forthright.RData")
 write_csv(explore_survey, "data/forthright_survey.csv")
 
 
-
+#most common referrals
 explore_yougov %>% 
   #filter(!is.na(label)) %>% 
   filter(ref_media == 'referrals') %>% 
@@ -323,6 +323,13 @@ explore_yougov %>%
   tally() %>% 
   arrange(desc(n))
   
+#How many disinformation sites that people visited in this dataset? Majority of these sites are left bias -> questionable sources -> right bias
+dis_sites<-explore_yougov %>% 
+  filter(!is.na(label)) %>% 
+  group_by(domain, label) %>% 
+  tally()
+
+table(dis_sites$label) #Check the label
 
 
 
