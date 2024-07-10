@@ -20,9 +20,14 @@ total_people
 # how many people have visited fake news sources? - 333
 fake_news_visitors <- explore_yougov %>% 
   filter(!is.na( slant)) %>%
+  filter(label == 'fake' & page_duration > 6) %>% 
   summarise(unique_ids = n_distinct(person_id)) %>% 
   pull(unique_ids)
+
 fake_news_visitors
+
+
+
 
 
 
@@ -99,7 +104,7 @@ explore_yougov %>%
 
 #Where did this person go? Majority is right bias--5542 visits
 explore_yougov %>% 
-  filter(person_id=="us:2381143") %>% 
+  filter(!is.na(label)) %>% 
   group_by(label) %>% 
   tally()
 
@@ -311,6 +316,13 @@ write_csv(explore_survey, "data/forthright_survey.csv")
 
 
 
+explore_yougov %>% 
+  #filter(!is.na(label)) %>% 
+  filter(ref_media == 'referrals') %>% 
+  group_by(domain) %>% 
+  tally() %>% 
+  arrange(desc(n))
+  
 
 
 

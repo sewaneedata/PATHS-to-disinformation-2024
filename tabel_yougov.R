@@ -1,4 +1,5 @@
 library(tidyverse)
+library(readxl)
 
 ideology <- load("data/yougov_ideology.RData")
 
@@ -8,22 +9,31 @@ ideology <- yougov_ideology %>%
 survey_data <- read_excel("data/SURVEY WAVE 1/US/SAV for client (topic) 20220222 28.9.2022 - CODES.xlsx")
 
 
+# change person id to lower so that it can be joined
 survey_data <- survey_data %>% mutate(person_id = tolower(person_id))
 
+
+# change gender to numeric so that it doesn't cause any issues
 survey_data <- survey_data %>%
   mutate(gender = as.numeric(as.character(gender)))
 
+# join people from the survey onto ideology based on gender creating a table 
+yougov_join <- yougov_ideology %>% 
+  select(person_id, q12_ideology, slant) %>%
+  distinct() %>%
+  left_join(survey_data %>% select(person_id, gender), by = "person_id")
 
-gender_table <- survey_data %>%
+
+# Convert gender to human-readable form after joining
+yougov_join <- yougov_join %>%
   mutate(gender = case_when(
     gender == 1.0 ~ "Male",
     gender == 2.0 ~ "Female",
-    TRUE ~ "Unknown"
-  )) %>%
-  group_by(gender) %>%
-  tally()
+    TRUE ~ NA_character_  # Handle any other values or NA
+  ))
 
-gender_table
+
+yougov_join %>% group_by(gender) %>%  tally()
 
 # Convert educ to numeric where possible
 survey_data <- survey_data %>%
@@ -50,7 +60,10 @@ survey_data <- survey_data %>%
   mutate(qage = as.numeric(as.character(qage)))
 
 
+mean(survey_data$qage, na.rm = TRUE)
+
 age_table <- survey_data %>% 
+  filter(!is.na(qage)) %>% 
   mutate(qage = case_when(
     qage <= 17 ~ "17 or younger",
     qage <= 34 ~ "18-34",
@@ -112,6 +125,14 @@ ideology_table <- yougov_ideology %>%
   rename(pol=slant)
 
 ideology_table
+
+
+# grouping by slant
+yougov_ideology %>% 
+  group_by(slant) %>% 
+  summarise(unique_ids = n_distinct(person_id))
+
+
 
 
 survey_data <- survey_data %>%

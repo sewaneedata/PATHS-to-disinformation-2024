@@ -17,8 +17,8 @@ names(disinformation) <- c("extension", #url
                            "type" )
 #Join label
 yougov_label <- paths_to_disinformation %>% 
-  left_join(disinformation, by="extension") %>% 
-  select(-source, -last_update, -harm_score, -type)
+  left_join(disinformation %>% select( extension, label ), by="extension") # %>% 
+  # select(-source, -last_update, -harm_score, -type)
 
 #Check
 table(yougov_label$label)
