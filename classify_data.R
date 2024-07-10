@@ -23,7 +23,7 @@ yougov_label <- paths_to_disinformation %>%
 #Check
 table(yougov_label$label)
 
-#----------------------------#
+###FORTHRIGHT-------------------------
 #Import
 forthright <- load("data/paths_us_forthright.RData")
 
@@ -50,9 +50,17 @@ forthright <- load("data/paths_us_forthright.RData")
 #   filter( domain %in% duplicated_domains ) %>%
 #   arrange( domain )
 
-# #Join label
-# forthright_label <- paths_us_forthright %>% 
-#   left_join(disinformation %>% select(label, domain), by="domain")
+#Rename for forthright
+names(disinformation) <- c("domain", #url 
+                           "label", 
+                           "source", 
+                           "last_update", 
+                           "harm_score", 
+                           "type" )
+
+#Join label
+forthright_label <- paths_us_forthright %>% 
+  left_join(disinformation %>% select(label, domain), by="domain")
 # 
 # #Check
 # table(forthright_label$label)
@@ -68,8 +76,7 @@ forthright <- load("data/paths_us_forthright.RData")
 #   filter(label=="fake news") %>% 
 #   tally
 
-#Check
-table(forthright_label$type)
+####EXPERIMENT-----
 
 #Looking at distribution
 yougov_label %>% 

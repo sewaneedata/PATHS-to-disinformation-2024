@@ -3,6 +3,7 @@
 ####PEOPLE------
 #Load library
 library(tidyverse)
+library(kableExtra)
 
 #Import dataset that we want to use for descriptive
 explore_survey <- read_csv("data/forthright_survey.csv")
@@ -131,8 +132,6 @@ table_df <- bind_rows(age_table, gender_table, ideology_table, education_table, 
 
 #Make table looks pretty
 #install.packages("kableExtra")
-library(kableExtra)
-
 #Nika's code of making table
 kbl(table_df, caption = 'Descriptive Table') %>%
   kable_styling(bootstrap_options = c('striped', 'condensed', font_size = 12)) %>%
@@ -159,19 +158,81 @@ load("data/explore_forthright.RData")
 socialmedia <- explore_forthright %>% 
   filter(other=="socialmedia") %>% 
   group_by(domain) %>% 
-  tally()
+  tally() %>% 
+  arrange(desc(n))
+
+#Table of entertainment site that people visited
+entertainment <- explore_forthright %>% 
+  filter(other=="entertainment") %>% 
+  group_by(domain) %>% 
+  tally()%>% 
+  arrange(desc(n))
+
+#Table of alternative media that people visited
+alt_media <- explore_forthright %>% 
+  filter(other=="alternativemedia") %>% 
+  group_by(domain) %>% 
+  tally()%>% 
+  arrange(desc(n))
 
 #Table of search engines people visited
 referral <- explore_forthright %>% 
   filter(ref_media=="referrals") %>% 
   group_by(domain) %>% 
-  tally
+  tally()%>% 
+  arrange(desc(n))
 
 media <- explore_forthright %>% 
   filter(ref_media=="media") %>% 
   group_by(domain) %>% 
-  tally
+  tally() %>% 
+  arrange(desc(n)) %>% 
+  head(10)
+# 3608 observations, how should we deal with this? Taking top 10?
 
 #Making table for website
-web_df <- bind_rows(media, referral, socialmedia)
+web_df <- bind_rows(referral, media, socialmedia, entertainment, alt_media)
 
+kbl(web_df, caption = 'Descriptive Table for Media') %>%
+  kable_styling(bootstrap_options = c('striped', 'condensed', font_size = 12)) %>%
+  pack_rows('Referrals', 1, 19) %>% # pack_rows puts the rows in groups
+  pack_rows('Media', 20, 29) %>% 
+  pack_rows('Social media', 30, 49) %>% 
+  pack_rows('Entertainment', 50, 63) %>% 
+  pack_rows('Alternative media', 64, 69) %>% 
+  kable_minimal()
+
+# should we take off the domain with less than 10 visits?
+
+###OTHER----
+
+# Facebook
+explore_forthright %>% 
+  filter(domain=="facebook.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="twitter.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="youtube.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="yahoo.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="google.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="bing.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
