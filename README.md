@@ -1,5 +1,5 @@
 # PATHS-to-disinformation-2024
-A summer 2024 project in collaboration with DataLab and the University of Catalonia.
+A summer 2024 project in collaboration with DataLab and the Open University of Catalonia.
 
 This is the repository for the Paths to Disinformation 2024 project by Sewanee DataLab fellows. The project partner, Professor Ana Cardinal, is a political science professor at the Open University of Catalonia. Our partner requested an analysis of two data sets, brought by YouGov (370 participants) and Forthright (584 participants), that track the participants' browsing history in a period that spanned 2-3 months. What our analysis targets is identifying the digital pathways that lead people to misinformation and to see how political ideology or partisanship can affect a person's internet behavior.   
 
