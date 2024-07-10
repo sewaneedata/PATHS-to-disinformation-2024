@@ -1,28 +1,32 @@
+# Load necessary libraries
 library(tidyverse)
 library(readxl)
+library(kableExtra)
 
-ideology <- load("data/yougov_ideology.RData")
+# Load and prepare ideology data
+load("data/yougov_ideology.RData")
 
 ideology <- yougov_ideology %>% 
   filter(!is.na(ideology))
 
+# Load survey data
 survey_data <- read_excel("data/SURVEY WAVE 1/US/SAV for client (topic) 20220222 28.9.2022 - CODES.xlsx")
 
-
-# change person id to lower so that it can be joined
+# Change person_id to lower so that it can be joined
 survey_data <- survey_data %>% mutate(person_id = tolower(person_id))
 
+survey_data <- survey_data %>%
+  semi_join(ideology, by = "person_id")
 
-# change gender to numeric so that it doesn't cause any issues
+# Change gender to numeric so that it doesn't cause any issues
 survey_data <- survey_data %>%
   mutate(gender = as.numeric(as.character(gender)))
 
-# join people from the survey onto ideology based on gender creating a table 
-yougov_join <- yougov_ideology %>% 
+# Join people from the survey onto ideology based on gender creating a table
+yougov_join <- ideology %>% 
   select(person_id, q12_ideology, slant) %>%
   distinct() %>%
   left_join(survey_data %>% select(person_id, gender), by = "person_id")
-
 
 # Convert gender to human-readable form after joining
 yougov_join <- yougov_join %>%
@@ -32,8 +36,7 @@ yougov_join <- yougov_join %>%
     TRUE ~ NA_character_  # Handle any other values or NA
   ))
 
-
-yougov_join %>% group_by(gender) %>%  tally()
+gender_table <- yougov_join %>% group_by(gender) %>%  tally()
 
 # Convert educ to numeric where possible
 survey_data <- survey_data %>%
@@ -53,14 +56,9 @@ education_table <- survey_data %>%
   group_by(educ) %>%
   tally()
 
-education_table
-
-
+# Convert qage to numeric where possible
 survey_data <- survey_data %>%
   mutate(qage = as.numeric(as.character(qage)))
-
-
-mean(survey_data$qage, na.rm = TRUE)
 
 age_table <- survey_data %>% 
   filter(!is.na(qage)) %>% 
@@ -76,186 +74,162 @@ age_table <- survey_data %>%
   group_by(qage) %>% 
   tally()
 
-age_table
-
-
-# solving for disinformation ( not working )
-
-classify_yougov <- read_csv("data/classify_yougov.csv")
-
-
-yougov_join <- yougov_ideology %>% 
-  select(person_id, q12_ideology, slant) %>%
-  distinct() 
-
-explore_yougov <- classify_yougov %>% 
-  left_join(yougov_join, by="person_id")
-
-# Check for NA values in label
-sum(is.na(classify_yougov$label))
-
-# Check for non-NA values in label
-sum(!is.na(classify_yougov$label))
-
-
-#Visited disinformation site(s)
-dis_table <- classify_yougov %>% 
-  group_by(person_id) %>% 
-  summarize(dis = sum(!is.na(label))) %>%
-  mutate(dis = case_when(
-    dis == 0 ~ "Not visited",
-    dis >= 1 ~ "Visited"
-  )) %>%
-  ungroup() %>%  # Ungroup to remove groupings
-  count(dis) %>%  # Count the number of individuals in each category
-  complete(dis = c("Not visited", "Visited"), fill = list(n = 0))
-
-dis_table
-
-# how many people have visited fake news sources?
-explore_yougov %>% 
-  summarise(unique_ids = n_distinct(person_id))
-
-
-# ideology tables
-ideology_table <- yougov_ideology %>% 
+# Ideology tables
+ideology_table <- ideology %>%
   filter(!is.na(slant)) %>% 
   group_by(slant) %>% 
-  tally %>% 
-  rename(pol=slant)
+  tally() %>% 
+  rename(pol = slant)
 
-ideology_table
-
-
-# grouping by slant
-yougov_ideology %>% 
-  group_by(slant) %>% 
-  summarise(unique_ids = n_distinct(person_id))
-
-
-
-
+# Household income table
 survey_data <- survey_data %>%
   mutate(Q26 = as.numeric(as.character(Q26)))
 
-house_inc_table <- survey_data %>% 
+house_inc_table <- survey_data %>%
   filter(!is.na(Q26)) %>%
-  group_by(Q26) %>% 
-  tally %>% 
-  rename(inc=Q26) %>% 
-  # the code book for household income is here (https://docs.google.com/spreadsheets/d/1iak_hLNUfix-T7ZWQXSwYrJYCBwpeeqe/edit?gid=744930251#gid=744930251)
-  mutate(inc=case_when(inc==1 ~ "< 5,000",
-                       inc==2 ~ "5,000-9,999",
-                       inc==3 ~ "10,000-14,999",
-                       inc==4 ~ "15,000-19,999",
-                       inc==5 ~ "20,000-24,999",
-                       inc==6 ~ "25,000-29,999",
-                       inc==7 ~ "30,000-34,999",
-                       inc==8 ~ "35,000-39,999",
-                       inc==9 ~ "40,000-44,999",
-                       inc==10 ~ "45,000-49,999",
-                       inc==11 ~ "50,000-59,999",
-                       inc==12 ~ "60,000-69,999",
-                       inc==13 ~ "70,000-99,999",
-                       inc==14 ~ "100,000-149,999",
-                       inc==15 ~ "> 150,000",
-                       inc==996.0 ~ "Don’t know",
-                       inc==997.0 ~ "Prefer not to answer", TRUE~NA))
-
-house_inc_table
-
-survey_data <- survey_data %>%
-  filter(!is.na(Q6)) %>%
-  mutate(Q6 = as.numeric(as.character(Q6)))
-
-
-  
-interest_table <- survey_data %>% 
-  filter(!is.na(Q6)) %>%
-  group_by(Q6) %>% 
-  tally() %>% 
-  rename(interest = Q6) %>%
-  mutate(interest = case_when(
-    interest == 1 ~ "Very interested",
-    interest == 2 ~ "Somewhat interested",
-    interest == 3 ~ "Not very interested",
-    interest == 4 ~ "Not at all interested",
-    TRUE ~ "Unknown"  # Handle any unexpected values
+  group_by(Q26) %>%
+  tally() %>%
+  rename(inc = Q26) %>%
+  mutate(inc = case_when(
+    inc == 1 ~ "< 5,000",
+    inc == 2 ~ "5,000-9,999",
+    inc == 3 ~ "10,000-14,999",
+    inc == 4 ~ "15,000-19,999",
+    inc == 5 ~ "20,000-24,999",
+    inc == 6 ~ "25,000-29,999",
+    inc == 7 ~ "30,000-34,999",
+    inc == 8 ~ "35,000-39,999",
+    inc == 9 ~ "40,000-44,999",
+    inc == 10 ~ "45,000-49,999",
+    inc == 11 ~ "50,000-59,999",
+    inc == 12 ~ "60,000-69,999",
+    inc == 13 ~ "70,000-99,999",
+    inc == 14 ~ "100,000-149,999",
+    inc == 15 ~ "> 150,000",
+    inc == 996.0 ~ "Don’t know",
+    inc == 997.0 ~ "Prefer not to answer",
+    TRUE ~ NA
   ))
-interest_table
 
-
+# Interest in politics table
 survey_data <- survey_data %>%
-  filter(!is.na(Q5_politics)) %>%
   mutate(Q5_politics = as.numeric(as.character(Q5_politics)))
 
-#Interested in News about domestic or international politics
-pol_news_table <- survey_data %>% 
-  group_by(Q5_politics) %>% 
-  tally %>% 
-  rename(pol_news=Q5_politics) %>%
-  # the code book for people's interest in type of news is here (https://docs.google.com/spreadsheets/d/1iak_hLNUfix-T7ZWQXSwYrJYCBwpeeqe/edit?gid=744930251#gid=744930251)
-  mutate(pol_news=case_when(pol_news==1 ~ "Very interested",
-                            pol_news==2 ~ "Somewhat interested",
-                            pol_news==3 ~ "Not very interested",
-                            pol_news==4 ~ "Not at all interested", TRUE~NA))
-interest_table
+pol_news_table <- survey_data %>%
+  filter(!is.na(Q5_politics)) %>%
+  group_by(Q5_politics) %>%
+  tally() %>%
+  rename(pol_news = Q5_politics) %>%
+  mutate(pol_news = case_when(
+    pol_news == 1 ~ "Very interested",
+    pol_news == 2 ~ "Somewhat interested",
+    pol_news == 3 ~ "Not very interested",
+    pol_news == 4 ~ "Not at all interested",
+    TRUE ~ NA
+  ))
 
-
-
+# Interest in economy news table
 survey_data <- survey_data %>%
-  filter(!is.na(Q5_economys)) %>%
   mutate(Q5_economys = as.numeric(as.character(Q5_economys)))
 
-#Interested in Economy, Business and financial news
-econ_news_table <- survey_data %>% 
-  group_by(Q5_economys) %>% 
-  tally %>% 
-  rename(econ_news=Q5_economys) %>%
-  # the code book for people's interest in type of news is here (https://docs.google.com/spreadsheets/d/1iak_hLNUfix-T7ZWQXSwYrJYCBwpeeqe/edit?gid=744930251#gid=744930251)
-  mutate(econ_news=case_when(econ_news==1 ~ "Very interested",
-                             econ_news==2 ~ "Somewhat interested",
-                             econ_news==3 ~ "Not very interested",
-                             econ_news==4 ~ "Not at all interested", TRUE~NA))
-econ_news_table
+econ_news_table <- survey_data %>%
+  filter(!is.na(Q5_economys)) %>%
+  group_by(Q5_economys) %>%
+  tally() %>%
+  rename(econ_news = Q5_economys) %>%
+  mutate(econ_news = case_when(
+    econ_news == 1 ~ "Very interested",
+    econ_news == 2 ~ "Somewhat interested",
+    econ_news == 3 ~ "Not very interested",
+    econ_news == 4 ~ "Not at all interested",
+    TRUE ~ NA
+  ))
 
-#install.packages("kableExtra")
-library(dplyr)
-library(kableExtra)
+# Good at understanding political issues table
+survey_data <- survey_data %>%
+  mutate(Q7_1 = as.numeric(as.character(Q7_1)))
 
+good_at_important_pol_issues <- survey_data %>%
+  filter(!is.na(Q7_1)) %>%
+  group_by(Q7_1) %>%
+  tally() %>%
+  rename(good_at_important_pol_issues = Q7_1) %>%
+  mutate(good_at_important_pol_issues = case_when(
+    good_at_important_pol_issues == 1 ~ "Strongly Disagree",
+    good_at_important_pol_issues == 2 ~ "Disagree",
+    good_at_important_pol_issues == 3 ~ "Neither agree nor disagree",
+    good_at_important_pol_issues == 4 ~ "Agree", 
+    good_at_important_pol_issues == 5 ~ "Strongly Agree",
+    TRUE ~ NA
+  ))
 
-table_df <- bind_rows(
-  age_table, gender_table, ideology_table, education_table, 
-  house_inc_table, pol_news_table, econ_news_table
+# Skeptical of mainstream media table
+survey_data <- survey_data %>%
+  mutate(Q8_3 = as.numeric(as.character(Q8_3)))
+
+skeptical_of_mainstream_meadia <- survey_data %>%
+  filter(!is.na(Q8_3)) %>%
+  group_by(Q8_3) %>%
+  tally() %>%
+  rename(skeptical_of_mainstream_meadia = Q8_3) %>%
+  mutate(skeptical_of_mainstream_meadia = case_when(
+    skeptical_of_mainstream_meadia == 1 ~ "Strongly Disagree",
+    skeptical_of_mainstream_meadia == 2 ~ "Disagree",
+    skeptical_of_mainstream_meadia == 3 ~ "Neither agree nor disagree",
+    skeptical_of_mainstream_meadia == 4 ~ "Agree", 
+    skeptical_of_mainstream_meadia == 5 ~ "Strongly Agree",
+    TRUE ~ NA
+  ))
+
+# Race table
+survey_data <- survey_data %>%
+  mutate(race = as.numeric(as.character(race)))
+
+race_table <- survey_data %>%
+  filter(!is.na(race)) %>%
+  group_by(race) %>%
+  tally() %>%
+  mutate(race = case_when(
+    race == 1 ~ "White",
+    race == 2 ~ "Black",
+    race == 3 ~ "Hispanic",
+    race == 4 ~ "Asian",
+    race == 5 ~ "Native American",
+    race == 6 ~ "Two or more races",
+    race == 7 ~ "Other",
+    TRUE ~ NA
+  ))
+
+# Combine all tables into a single dataframe with consistent column names
+combined_table <- bind_rows(
+  age_table %>% rename(Variable = qage),
+  gender_table %>% rename(Variable = gender),
+  ideology_table %>% rename(Variable = pol),
+  education_table %>% rename(Variable = educ),
+  house_inc_table %>% rename(Variable = inc),
+  pol_news_table %>% rename(Variable = pol_news),
+  econ_news_table %>% rename(Variable = econ_news),
+  good_at_important_pol_issues %>% rename(Variable = good_at_important_pol_issues),
+  skeptical_of_mainstream_meadia %>% rename(Variable = skeptical_of_mainstream_meadia),
+  race_table %>% rename(Variable = race)
 ) %>%
-  mutate(Variables = coalesce(qage, gender, pol, educ, inc, pol_news, econ_news)) %>%
-  select(Variables, n)
+  select(Variable, n)
 
-head( table_df, 10)
-
-view(table_df)
+# Display the combined table
+print(combined_table)
 
 # Create styled table
-styled_table <- kbl(table_df, caption = 'Descriptive Table') %>%
+styled_table <- kbl(combined_table, caption = 'YouGov Information Table') %>%
   kable_styling(bootstrap_options = c('striped', 'condensed'), font_size = 12) %>%
   pack_rows("Age group", 1, 5) %>%
   pack_rows("Gender", 6, 7) %>%
   pack_rows("Political affiliation", 8, 10) %>%
-  pack_rows("Education level", 11, 16) %>%
-  pack_rows("Household income (per year)", 17, 33) %>%
+  pack_rows("Education level", 11, 17) %>%
+  pack_rows("Household income (per year)", 18, 33) %>%
   pack_rows("Interest in news about domestic or international politics", 34, 37) %>%
-  pack_rows("Interest in economy, business and financial news", 38, 41)
+  pack_rows("Interest in economy, business and financial news", 38, 41) %>% 
+  pack_rows("It is important to be skeptical of what the mainstream media reports", 42, 46) %>% 
+  pack_rows("Good at understanding important political issues", 47, 51) %>% 
+  pack_rows("Race", 52, 58)
 
-# table is working missing a few things that the other one but my survey sheet doesn't have those things in it anyways. 
-# also disinformation is not working and needs to be fixed 
-styled_table
-
-
-load("data/explore_")
-
-#Disinformation websites
-dis_sites <- explore_forthright %>% 
-  filter(!is.na(label)) %>% 
-  group_by(label) %>%
-  summarise(visits=n(), num_sites=n_distinct(domain))
-
+print(styled_table)
