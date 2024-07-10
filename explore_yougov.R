@@ -40,6 +40,9 @@ tallied_data <- foo %>%
   group_by(type, axis2, slant) %>% 
   tally()
 
+tallied_data %>% mutate( slant = case_when( slant == "slant" ~ "Political Affiliation", TRUE ~ slant ))
+
+
 # Plot with updated colors
 ggplot(tallied_data %>% drop_na(type) %>% filter(axis2 != "non"), aes(axis1 = type, axis2 = axis2, y = n)) +
   geom_alluvium(aes(fill = slant)) +
@@ -51,7 +54,8 @@ ggplot(tallied_data %>% drop_na(type) %>% filter(axis2 != "non"), aes(axis1 = ty
   theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
   labs(y = "Number of Visits",
        x = "Paths",
-       title = "Alluvial Diagram of Domain Visits")
+       title = "Alluvial Diagram of Domain Media Visits",
+       fill = "Political Affiliation")
 
 
 ##### Partisanship graph
@@ -75,7 +79,7 @@ tallied_data_foo <- foo %>%
 
 
 
-ggplot( tallied_data_foo %>% drop_na(partisanship) %>%  filter(axis2 != "non"), aes( axis1 = partisanship, axis2 = axis2, y = n)) +
+ggplot( tallied_data_foo %>% drop_na(partisanship) %>%  filter(axis2 != "non", partisanship != "Neutral"), aes( axis1 = partisanship, axis2 = axis2, y = n)) +
   geom_alluvium(aes(fill=slant)) +
   scale_fill_manual( values = c( "blue", "grey", "red")) + 
   geom_stratum() +
@@ -85,7 +89,9 @@ ggplot( tallied_data_foo %>% drop_na(partisanship) %>%  filter(axis2 != "non"), 
   theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
   labs(y = "Number of Visits",
        x = "Paths",
-       title = "Alluvial Diagram of Domain Visits")
+       title = "Alluvial Diagram of Partisan Visits",
+       fill = "Political Affiliation")
+
   
 
 
