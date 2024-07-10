@@ -1,13 +1,97 @@
 library(tidyverse)
+library(readxl)
+library(ggalluvial)
+
+# Load data
 ideology <- load("data/yougov_ideology.RData")
 classify_yougov <- read_csv("data/classify_yougov.csv")
 
+# Join data
 yougov_join <- yougov_ideology %>% 
   select(person_id, q12_ideology, slant) %>%
   distinct() 
 
 explore_yougov <- classify_yougov %>% 
-  left_join(yougov_join, by="person_id")
+  left_join(yougov_join, by="person_id") %>% 
+  arrange(person_id, start_time) %>% 
+  mutate( label = case_when( label == "left bias" ~ "Left Bias",
+                             label == "right bias" ~ "Right Bias",
+                             TRUE ~ label )) %>% 
+  mutate(next_label = lead(label))
+
+explore_yougov <- bind_rows(
+  explore_yougov %>% filter(!is.na(label), page_duration > 4),
+  explore_yougov %>% filter(is.na(label))
+) %>% 
+  arrange(person_id, start_time) %>% 
+  mutate(type = case_when(
+    ref_media == "referrals" & other == "socialmedia" ~ "Both",
+    ref_media == "referrals" & other != "socialmedia" ~ "Referrals",
+    ref_media != "referrals" & other == "socialmedia" ~ "Social Media",
+    ref_media == "referrals" & is.na(other) ~ "Referrals",
+    is.na(ref_media) & other == "socialmedia" ~ "Social Media"
+  ))
+
+foo <- explore_yougov %>% 
+  mutate(axis2 = ifelse(next_label %in% c("Left Bias", "Right Bias"), next_label, "non")) %>% 
+  mutate(type = factor(type, levels = c("Referrals", "Social Media", "Both")))
+
+tallied_data <- foo %>% 
+  group_by(type, axis2, slant) %>% 
+  tally()
+
+# Plot with updated colors
+ggplot(tallied_data %>% drop_na(type) %>% filter(axis2 != "non"), aes(axis1 = type, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill = slant)) +
+  scale_fill_manual( values = c( "blue", "grey", "red")) + 
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Type", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Alluvial Diagram of Domain Visits")
+
+
+##### Partisanship graph
+
+
+partisanship <- explore_yougov %>%
+  filter( ref_media == "media" ) %>%
+  group_by( domain, slant ) %>%
+  summarize( n = n_distinct(person_id) ) %>%
+  mutate( total = sum(n), pct = n/total ) %>%
+  filter( total >= 10 ) %>%
+  arrange( desc( pct ) ) %>%
+  slice_head(n=1) %>%
+  select( domain, partisanship = slant )
+
+foo <- left_join( foo, partisanship, by = "domain")
+
+tallied_data_foo <- foo %>% 
+  group_by( partisanship, axis2, slant) %>% 
+  tally()
+
+
+
+ggplot( tallied_data_foo %>% drop_na(partisanship) %>%  filter(axis2 != "non"), aes( axis1 = partisanship, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c( "blue", "grey", "red")) + 
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Type", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Alluvial Diagram of Domain Visits")
+  
+
+
+
+
+
 
 # how many people in the data set?? 370, 1:49 - 450
 total_people <- yougov_ideology %>% 
