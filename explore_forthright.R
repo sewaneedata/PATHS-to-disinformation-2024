@@ -2,8 +2,10 @@
 #Load library + import data
 library(tidyverse)
 library(readxl)
-ideology <- load("data/forthright_ideology.RData")
-classify <- load("data/classify_forthright.RData")
+library(ggalluvial)
+
+load("data/forthright_ideology.RData")
+load("data/classify_forthright.RData")
 
 
 #Join dataset
@@ -12,13 +14,32 @@ forthright_join <- forthright_ideology %>%
   distinct() 
 
 explore_forthright <- forthright_label %>% 
-  left_join(forthright_join, by="member_id")
+  left_join(forthright_join, by="member_id") %>% 
+  arrange( member_id, start_time_local ) %>% 
+  #Looking at domain, referrals media, and category of that site from previous visit
+  # mutate( prev_domain = lag( domain ), next_domain = lead( domain ) ) %>% 
+  # mutate(prev_ref_media = lag(ref_media), next_ref_media = lead( ref_media )) %>% 
+  # mutate(prev_other = lag(other), next_domain = lead( other )) %>% 
+  mutate(label=case_when(label=="left bias" ~ "Left bias",
+                         label=="right bias" ~ "Right bias", 
+                         TRUE ~ label)) %>% 
+  # looking at what kind of disinformation site people visited after the previous vist
+  mutate(next_label= lead(label))
 
-#Identify and remove unnecessary
-#We remove those visits disinformation sites that are less than 4 seconds because that mean they didn't really visit the site
-explore_forthright <- explore_forthright %>% 
-  filter(!is.na(label), duration_seconds > 4) %>% 
-  bind_rows(explore_forthright %>% filter (is.na(label)))
+
+explore_forthright <- bind_rows( explore_forthright %>% filter(!is.na(label), duration_seconds > 4),
+                                 explore_forthright %>% filter (is.na(label)) ) %>%
+  arrange( member_id, start_time_local ) %>% 
+  # categorize referrals and social media sites
+  mutate(type=case_when(ref_media=="referrals" & other=="socialmedia" ~ "Both",
+                        ref_media=="referrals" & other!="socialmedia" ~ "Referrals",
+                        ref_media!="referrals" & other=="socialmedia" ~ "Social media",
+                        ref_media=="referrals" & is.na(other) ~ "Referrals",
+                        is.na(ref_media) & other=="socialmedia" ~ "Social media"))
+                                 
+  #We remove those visits disinformation sites that are less than 4 seconds because that mean they didn't really visit the site
+  # filter(!is.na(label), duration_seconds > 4) %>% 
+  # bind_rows(explore_forthright %>% filter (is.na(label)))
 
 
 ##Explore dataset----------
@@ -121,4 +142,73 @@ save(explore_forthright, file="data/explore_forthright.RData")
 save(forthright_ideology, file="data/forthright_ideology.RData")
 write_csv(explore_survey, "data/forthright_survey.csv")
 
+####ALLUVIUM----
 
+# partisan sites -- media that are determined by the amount of audience (example: majority of left wing visited this site -> it's a left wing site)
+partisan <- explore_forthright %>% 
+  filter( ref_media == "media" ) %>% 
+  group_by( domain, slant ) %>% 
+  summarize( n = n_distinct(member_id) ) %>% 
+  mutate( total = sum(n), pct = n/total ) %>%
+  filter( total >= 10 ) %>% 
+  arrange( desc( pct ) ) %>%
+  slice_head(n=1) %>% 
+  select( domain, partisanship = slant ) 
+
+test <- explore_forthright %>%
+  # make a column to only look closely at left or right bias from disinformation sites
+  mutate(axis2 = ifelse(next_label %in% c("Left bias", "Right bias"), next_label, "non")) %>% 
+  mutate( type = factor( type, levels = c("Referrals", "Social media", "Both"))) %>% 
+  left_join(partisan, by = "domain" ) 
+      
+
+# test <- test %>%
+#   mutate( type = ifelse( is.na( type ), partisanship, type ) )
+
+# Group and tally the data
+paths_1 <- test %>%
+  group_by(type, axis2, slant) %>%
+  tally()
+
+paths_2 <- test %>% 
+  group_by(partisanship, axis2, slant) %>% 
+  tally()
+
+# Merge tallied data back with the original dataset to get the counts
+#test <- left_join(test, tallied_data, by = "domain")
+
+# Plot using ggplot
+ggplot(paths_1 %>% drop_na(type) %>% filter( axis2 != "non"), aes(axis1 = type, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c("blue", "grey", "red") ) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Type", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(family = "Times New Roman")) + 
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Alluvial Diagram of Domain Visits",
+       fill = "Political affiliation")
+
+#Plot partisan paths
+ggplot(paths_2 %>% drop_na(partisanship) %>% filter( axis2 != "non", partisanship!="Neutral"), aes(axis1 = partisanship, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c("blue", "grey", "red") ) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Partisan media", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(family = "Times New Roman")) + 
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Alluvial Diagram of Partisan Media Visits",
+       fill = "Political affiliation")
+
+#Disinformation visits
+explore_survey$dis <- as.factor(explore_survey$dis)
+
+ggplot(explore_survey %>% drop_na(slant), aes(x=slant))+
+  geom_bar(aes(fill=dis))

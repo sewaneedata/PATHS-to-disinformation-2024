@@ -133,16 +133,16 @@ table_df <- bind_rows(age_table, gender_table, ideology_table, education_table, 
 #Make table looks pretty
 #install.packages("kableExtra")
 #Nika's code of making table
-kbl(table_df, caption = 'Descriptive Table') %>%
+kbl(table_df, caption = 'Descriptive Demographic Table') %>%
   kable_styling(bootstrap_options = c('striped', 'condensed', font_size = 12)) %>%
   pack_rows('Age group', 1, 6) %>% # pack_rows puts the rows in groups
   pack_rows('Gender', 7, 10) %>% 
-  pack_rows('Political affiliation', 13, 16) %>%
-  pack_rows('Education level', 17, 26) %>% 
-  pack_rows('Household income (per year)', 27, 44) %>% 
-  pack_rows('Race', 45, 58) %>% 
-  pack_rows('News avoidance', 59, 66) %>% 
-  pack_rows('Interest in politics', 67, 71) %>% 
+  pack_rows('Political affiliation', 11, 14) %>%
+  pack_rows('Education level', 15, 24) %>% 
+  pack_rows('Household income (per year)', 25, 42) %>% 
+  pack_rows('Race', 43, 56) %>% 
+  pack_rows('News avoidance', 57, 64) %>% 
+  pack_rows('Interest in politics', 65, 69) %>% 
   kable_minimal()
 
 #Gender + Political
@@ -159,14 +159,16 @@ socialmedia <- explore_forthright %>%
   filter(other=="socialmedia") %>% 
   group_by(domain) %>% 
   tally() %>% 
-  arrange(desc(n))
+  arrange(desc(n)) %>% 
+  filter(n > 10)
 
 #Table of entertainment site that people visited
 entertainment <- explore_forthright %>% 
   filter(other=="entertainment") %>% 
   group_by(domain) %>% 
   tally()%>% 
-  arrange(desc(n))
+  arrange(desc(n)) %>% 
+  filter(n > 10)
 
 #Table of alternative media that people visited
 alt_media <- explore_forthright %>% 
@@ -180,7 +182,8 @@ referral <- explore_forthright %>%
   filter(ref_media=="referrals") %>% 
   group_by(domain) %>% 
   tally()%>% 
-  arrange(desc(n))
+  arrange(desc(n)) %>% 
+  filter(n > 10)
 
 media <- explore_forthright %>% 
   filter(ref_media=="media") %>% 
@@ -195,44 +198,11 @@ web_df <- bind_rows(referral, media, socialmedia, entertainment, alt_media)
 
 kbl(web_df, caption = 'Descriptive Table for Media') %>%
   kable_styling(bootstrap_options = c('striped', 'condensed', font_size = 12)) %>%
-  pack_rows('Referrals', 1, 19) %>% # pack_rows puts the rows in groups
-  pack_rows('Media', 20, 29) %>% 
-  pack_rows('Social media', 30, 49) %>% 
-  pack_rows('Entertainment', 50, 63) %>% 
-  pack_rows('Alternative media', 64, 69) %>% 
+  pack_rows('Referrals', 1, 15) %>% # pack_rows puts the rows in groups
+  pack_rows('Media', 16, 25) %>% 
+  pack_rows('Social media', 26, 37) %>% 
+  pack_rows('Entertainment', 38, 49) %>% 
+  pack_rows('Alternative media', 50, 55) %>% 
   kable_minimal()
 
-# should we take off the domain with less than 10 visits?
-
-###OTHER----
-
-# Facebook
-explore_forthright %>% 
-  filter(domain=="facebook.com") %>% 
-  group_by(slant) %>% 
-  summarise(id=n_distinct(member_id))
-
-explore_forthright %>% 
-  filter(domain=="twitter.com") %>% 
-  group_by(slant) %>% 
-  summarise(id=n_distinct(member_id))
-
-explore_forthright %>% 
-  filter(domain=="youtube.com") %>% 
-  group_by(slant) %>% 
-  summarise(id=n_distinct(member_id))
-
-explore_forthright %>% 
-  filter(domain=="yahoo.com") %>% 
-  group_by(slant) %>% 
-  summarise(id=n_distinct(member_id))
-
-explore_forthright %>% 
-  filter(domain=="google.com") %>% 
-  group_by(slant) %>% 
-  summarise(id=n_distinct(member_id))
-
-explore_forthright %>% 
-  filter(domain=="bing.com") %>% 
-  group_by(slant) %>% 
-  summarise(id=n_distinct(member_id))
+# should we take off the domain with less than 10 visits? YES!
