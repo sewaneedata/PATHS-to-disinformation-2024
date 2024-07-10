@@ -5,8 +5,12 @@ This is the repository for the Paths to Disinformation 2024 project by Sewanee D
 
 To run this code you have to install R studio and install every library per each script. Mainly what most of the scripts on this repository do is clean the dense data sets that we had and put them in a state from which observations can be inferred. Our observations/results are represented as both our identified pattern of how people come across misinformation, and a linear regression model that offers a quantifiable conclusion to the relationship between political affiliation bias and the consumption of disinformation. 
 
-Gabe Rice C'25
+Gabe Rice C'25 
+
 Nicole Nguyen C'26
+
 Mohamed Salem C'26
+
 Jawaria Jaleel C'27
+
 Perla Guzman C'27
