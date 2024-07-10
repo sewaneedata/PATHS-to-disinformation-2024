@@ -6,24 +6,24 @@ library(urltools)
 
 #Import files
 disinformation <- read_csv("data/disinformation.csv")
-yougov <- read_csv("data/paths_to_disinformation.csv")
+paths_to_disinformation <- read_csv("data/paths_to_disinformation.csv")
 
 #Rename
-names(disinformation) <- c("domain", #url 
+names(disinformation) <- c("extension", #url 
                            "label", 
                            "source", 
                            "last_update", 
                            "harm_score", 
                            "type" )
 #Join label
-yougov_label <- yougov %>% 
-  left_join(disinformation, by="domain") %>% 
-  select(-source, -last_update, -harm_score, -type)
+yougov_label <- paths_to_disinformation %>% 
+  left_join(disinformation %>% select( extension, label ), by="extension") # %>% 
+  # select(-source, -last_update, -harm_score, -type)
 
 #Check
 table(yougov_label$label)
 
-#----------------------------#
+###FORTHRIGHT-------------------------
 #Import
 forthright <- load("data/paths_us_forthright.RData")
 
@@ -50,26 +50,33 @@ forthright <- load("data/paths_us_forthright.RData")
 #   filter( domain %in% duplicated_domains ) %>%
 #   arrange( domain )
 
+#Rename for forthright
+names(disinformation) <- c("domain", #url 
+                           "label", 
+                           "source", 
+                           "last_update", 
+                           "harm_score", 
+                           "type" )
+
 #Join label
 forthright_label <- paths_us_forthright %>% 
   left_join(disinformation %>% select(label, domain), by="domain")
+# 
+# #Check
+# table(forthright_label$label)
+# 
+# #Exploring data
+# label_media <- forthright_label %>% 
+#   group_by(ref_media, other, label, type) %>% 
+#   tally
+# 
+# #Comparing fake news on app and website
+# forthright_label %>% 
+#   group_by(label, type) %>% 
+#   filter(label=="fake news") %>% 
+#   tally
 
-#Check
-table(forthright_label$label)
-
-#Exploring data
-label_media <- forthright_label %>% 
-  group_by(ref_media, other, label, type) %>% 
-  tally
-
-#Comparing fake news on app and website
-forthright_label %>% 
-  group_by(label, type) %>% 
-  filter(label=="fake news") %>% 
-  tally
-
-#Check
-table(forthright_label$type)
+####EXPERIMENT-----
 
 #Looking at distribution
 yougov_label %>% 

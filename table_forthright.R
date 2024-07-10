@@ -3,6 +3,7 @@
 ####PEOPLE------
 #Load library
 library(tidyverse)
+library(kableExtra)
 
 #Import dataset that we want to use for descriptive
 explore_survey <- read_csv("data/forthright_survey.csv")
@@ -68,13 +69,6 @@ age_table <- explore_survey %>%
                        age==5 ~ "55-64",
                        age==6 ~ "65+", TRUE~NA))
 
-#Visited disinformation site(s)
-dis_table <- explore_survey %>% 
-  group_by(dis) %>% 
-  tally %>% 
-  mutate(dis=case_when(dis==0 ~ "Not visited",
-                       dis==1 ~ "Visited", TRUE~NA))
-
 #Political affiliation 
 ideology_table <- explore_survey %>% 
   group_by(slant) %>% 
@@ -131,51 +125,24 @@ interest_table <- explore_survey %>%
                             interest==3 ~ "Not very interested",
                             interest==4 ~ "Not at all interested", TRUE~NA))
 
-#Interested in News about domestic or international politics
-pol_news_table <- explore_survey %>% 
-  group_by(Q6r1) %>% 
-  tally %>% 
-  rename(pol_news=Q6r1) %>%
-  # the code book for people's interest in type of news is here (https://docs.google.com/spreadsheets/d/1iak_hLNUfix-T7ZWQXSwYrJYCBwpeeqe/edit?gid=744930251#gid=744930251)
-  mutate(pol_news=case_when(pol_news==1 ~ "Very interested",
-                            pol_news==2 ~ "Somewhat interested",
-                            pol_news==3 ~ "Not very interested",
-                            pol_news==4 ~ "Not at all interested", TRUE~NA))
-
-#Interested in Economy, Business and financial news
-econ_news_table <- explore_survey %>% 
-  group_by(Q6r2) %>% 
-  tally %>% 
-  rename(econ_news=Q6r2) %>%
-  # the code book for people's interest in type of news is here (https://docs.google.com/spreadsheets/d/1iak_hLNUfix-T7ZWQXSwYrJYCBwpeeqe/edit?gid=744930251#gid=744930251)
-  mutate(econ_news=case_when(econ_news==1 ~ "Very interested",
-                            econ_news==2 ~ "Somewhat interested",
-                            econ_news==3 ~ "Not very interested",
-                            econ_news==4 ~ "Not at all interested", TRUE~NA))
-
 #Putting all small tables in one dataset
-table_df <- bind_rows(age_table, gender_table, dis_table, ideology_table, education_table, house_inc_table, race_table, avoid_pol_table, interest_table, pol_news_table, econ_news_table) %>% 
-  mutate(Variables=coalesce(age, gender, dis, pol, edu, inc, race, freq, interest, pol_news, econ_news)) %>% 
+table_df <- bind_rows(age_table, gender_table, ideology_table, education_table, house_inc_table, race_table, avoid_pol_table, interest_table) %>% 
+  mutate(Variables=coalesce(age, gender, pol, edu, inc, race, freq, interest)) %>% 
   select(Variables, n)
 
 #Make table looks pretty
 #install.packages("kableExtra")
-library(kableExtra)
-
-#Nika's code
+#Nika's code of making table
 kbl(table_df, caption = 'Descriptive Table') %>%
   kable_styling(bootstrap_options = c('striped', 'condensed', font_size = 12)) %>%
   pack_rows('Age group', 1, 6) %>% # pack_rows puts the rows in groups
   pack_rows('Gender', 7, 10) %>% 
-  pack_rows('Visited disinformation sites?', 11, 12) %>%
   pack_rows('Political affiliation', 13, 16) %>%
   pack_rows('Education level', 17, 26) %>% 
   pack_rows('Household income (per year)', 27, 44) %>% 
   pack_rows('Race', 45, 58) %>% 
   pack_rows('News avoidance', 59, 66) %>% 
   pack_rows('Interest in politics', 67, 71) %>% 
-  pack_rows('Interest in news about domestic or international politics', 72, 76) %>% 
-  pack_rows('Interest in economy, business and financial news', 77, 81) %>% 
   kable_minimal()
 
 #Gender + Political
@@ -187,8 +154,85 @@ ggplot(explore_survey, aes(x=Q26, fill=slant, na.rm=TRUE))+
 #Import dataset
 load("data/explore_forthright.RData")
 
-#Disinformation websites
-dis_sites <- explore_forthright %>% 
-  filter(!is.na(label)) %>% 
-  group_by(label) %>%
-  summarise(visits=n(), num_sites=n_distinct(domain))
+#Table of social media site that people visited
+socialmedia <- explore_forthright %>% 
+  filter(other=="socialmedia") %>% 
+  group_by(domain) %>% 
+  tally() %>% 
+  arrange(desc(n))
+
+#Table of entertainment site that people visited
+entertainment <- explore_forthright %>% 
+  filter(other=="entertainment") %>% 
+  group_by(domain) %>% 
+  tally()%>% 
+  arrange(desc(n))
+
+#Table of alternative media that people visited
+alt_media <- explore_forthright %>% 
+  filter(other=="alternativemedia") %>% 
+  group_by(domain) %>% 
+  tally()%>% 
+  arrange(desc(n))
+
+#Table of search engines people visited
+referral <- explore_forthright %>% 
+  filter(ref_media=="referrals") %>% 
+  group_by(domain) %>% 
+  tally()%>% 
+  arrange(desc(n))
+
+media <- explore_forthright %>% 
+  filter(ref_media=="media") %>% 
+  group_by(domain) %>% 
+  tally() %>% 
+  arrange(desc(n)) %>% 
+  head(10)
+# 3608 observations, how should we deal with this? Taking top 10?
+
+#Making table for website
+web_df <- bind_rows(referral, media, socialmedia, entertainment, alt_media)
+
+kbl(web_df, caption = 'Descriptive Table for Media') %>%
+  kable_styling(bootstrap_options = c('striped', 'condensed', font_size = 12)) %>%
+  pack_rows('Referrals', 1, 19) %>% # pack_rows puts the rows in groups
+  pack_rows('Media', 20, 29) %>% 
+  pack_rows('Social media', 30, 49) %>% 
+  pack_rows('Entertainment', 50, 63) %>% 
+  pack_rows('Alternative media', 64, 69) %>% 
+  kable_minimal()
+
+# should we take off the domain with less than 10 visits?
+
+###OTHER----
+
+# Facebook
+explore_forthright %>% 
+  filter(domain=="facebook.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="twitter.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="youtube.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="yahoo.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="google.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))
+
+explore_forthright %>% 
+  filter(domain=="bing.com") %>% 
+  group_by(slant) %>% 
+  summarise(id=n_distinct(member_id))

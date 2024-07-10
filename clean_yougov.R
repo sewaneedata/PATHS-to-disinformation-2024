@@ -40,7 +40,7 @@ disinformation <- bind_rows(disinformation, wp3_list_alternative_media %>% selec
 write_csv(disinformation, "data/disinformation.csv") 
 
 #Load webtrackings
-yougov <- load("data/YouGov/webtracking.RData")
+load("data/YouGov/yougov_webtracking.RData")
 
 #Filter USA
 webtracking <- webtracking %>% 
@@ -48,7 +48,7 @@ webtracking <- webtracking %>%
 
 
 #Identified people that accessed misinformation sources
-filtered_us <- webtracking %>% filter (domain %in% disinformation$url)
+filtered_us <- webtracking %>% filter (extension %in% disinformation$url )
 
 
 #Identify paths of people visited misinformation sources
@@ -61,6 +61,8 @@ write_csv( paths_us, "data/paths_to_disinformation.csv")
 # Count the number of rows where person_id has more than 12 characters
 paths_us %>%
   summarize(count = sum(nchar(person_id) > 12))
+
+
 
 
 

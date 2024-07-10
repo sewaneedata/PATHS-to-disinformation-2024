@@ -5,8 +5,6 @@ library(readxl)
 
 # Read the Excel file into a data frame
 screener_data <- read_excel("data/forthright/305021 - Consumer Digital Pilot - Screener Raw Data.xlsx")
-view(screener_data)
-
 load("data/FORTHRIGHT/forthright_webtracking_nicole.RData")
 
 # Assuming webtracking_forthright is the correct object name, if not, adjust accordingly
