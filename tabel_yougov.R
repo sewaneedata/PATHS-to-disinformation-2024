@@ -1,3 +1,6 @@
+# This script provides discriptive tables about the information of those who were in the survey
+# for the YouGov Dataset
+#############################################################################################
 # Load necessary libraries
 library(tidyverse)
 library(readxl)

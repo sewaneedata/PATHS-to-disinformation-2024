@@ -6,6 +6,7 @@ disinformation <- read_csv("data/disinformation_domains_clean.csv")
 #Remove Italian domains (butac, bufale, bufalopedia)
 disinformation <- disinformation %>% 
   filter (!source %in% c("butac", "bufale", "bufalopedia"))
+
 #Checking
 table(disinformation$source)
 
@@ -57,10 +58,6 @@ paths_us <- webtracking %>% filter ( person_id %in% filtered_us$person_id )
 #Save data
 write_csv( paths_us, "data/paths_to_disinformation.csv")
 
-
-# Count the number of rows where person_id has more than 12 characters
-paths_us %>%
-  summarize(count = sum(nchar(person_id) > 12))
 
 
 

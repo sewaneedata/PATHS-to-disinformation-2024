@@ -4,7 +4,6 @@ library(tidyverse)
 library(readxl)
 
 #getting YouGov ideology column 
-
 survey_info <- read.csv("data/YouGov/US_survey.csv")
 
 survey_info <- survey_info %>% mutate( person_id = tolower( person_id) )
@@ -15,9 +14,6 @@ load("data/YouGov/webtracking.RData")
 # Perform the left join
 merged_data <- webtracking %>%
   left_join(survey_info %>% select(person_id, q12_ideology), by = "person_id")
-
-
-# Select the necessary columns, including the q12 colum
 
 
 yougov_ideology <- merged_data %>%
@@ -31,10 +27,7 @@ yougov_ideology <- merged_data %>%
     neutral = as.numeric(q12_ideology == 5),
     right = as.numeric(q12_ideology >= 6))
 
-
-
-
-
+#saving the edited version so that we can work with it in the future
 save(yougov_ideology, file ="yougov_ideology.RData")
 
 

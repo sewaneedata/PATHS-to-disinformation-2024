@@ -17,8 +17,7 @@ names(disinformation) <- c("extension", #url
                            "type" )
 #Join label
 yougov_label <- paths_to_disinformation %>% 
-  left_join(disinformation %>% select( extension, label ), by="extension") # %>% 
-  # select(-source, -last_update, -harm_score, -type)
+  left_join(disinformation %>% select( extension, label ), by="extension") 
 
 #Check
 table(yougov_label$label)
@@ -26,29 +25,6 @@ table(yougov_label$label)
 ###FORTHRIGHT-------------------------
 #Import
 forthright <- load("data/paths_us_forthright.RData")
-
-#OLD BUT GOLD
-# #Separate the domain and its suffix
-# decomp <- suffix_extract( disinformation$domain )
-# 
-# disinformation2 <- disinformation %>% 
-#   mutate( domain = ifelse( !is.na(decomp$domain), decomp$domain, domain ) ) %>% 
-#   select(-source, -last_update, -harm_score, -type) %>%
-#   distinct() 
-# 
-# # find duplicated sites in disinformation2
-# duplicated_domains <- disinformation2 %>%
-#   group_by(domain) %>% 
-#   tally() %>% 
-#   filter( n > 1 ) %>%
-#   pull( domain )
-# 
-# disinformation2_no_duplicates <- disinformation2 %>%
-#   filter( ! domain %in% duplicated_domains )
-# 
-# disinformation2_duplicates <- disinformation2 %>%
-#   filter( domain %in% duplicated_domains ) %>%
-#   arrange( domain )
 
 #Rename for forthright
 names(disinformation) <- c("domain", #url 
@@ -61,20 +37,7 @@ names(disinformation) <- c("domain", #url
 #Join label
 forthright_label <- paths_us_forthright %>% 
   left_join(disinformation %>% select(label, domain), by="domain")
-# 
-# #Check
-# table(forthright_label$label)
-# 
-# #Exploring data
-# label_media <- forthright_label %>% 
-#   group_by(ref_media, other, label, type) %>% 
-#   tally
-# 
-# #Comparing fake news on app and website
-# forthright_label %>% 
-#   group_by(label, type) %>% 
-#   filter(label=="fake news") %>% 
-#   tally
+
 
 ####EXPERIMENT-----
 
