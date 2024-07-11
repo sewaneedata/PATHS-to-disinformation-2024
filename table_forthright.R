@@ -1,5 +1,6 @@
-#This script is for making a descriptive table
-
+# This script provides discriptive tables about the information of those who were in the survey
+# for the Forthright Dataset
+#############################################################################################
 ####PEOPLE------
 #Load library
 library(tidyverse)
