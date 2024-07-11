@@ -30,7 +30,7 @@ filtered_us <- webtracking %>% filter( domain %in% disinformation$url )
 #Identify paths of people visited misinformation sources
 paths_us_forthright <- webtracking %>% filter ( member_id %in% filtered_us$member_id)
 
-# Ideology
+####IDEOLOGY----
 forthright_ideology <- webtracking %>%
   left_join(screener_data %>% select(member_id, Q13), by = "member_id") 
   # Create a new column to classify political affiliation based on Q13
