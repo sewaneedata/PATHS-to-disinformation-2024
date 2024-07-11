@@ -1,4 +1,5 @@
 #This will join people's ideology and domain label from Forthright
+
 #Load library + import data
 library(tidyverse)
 library(readxl)
