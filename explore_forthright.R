@@ -45,7 +45,7 @@ explore_forthright <- bind_rows( explore_forthright %>% filter(!is.na(label), du
                         ref_media=="referrals" & is.na(other) ~ "Search engines",
                         is.na(ref_media) & other=="socialmedia" ~ "Social media")) %>% 
   mutate(next_domain=ifelse(next_domain %in% c("google.com", "cnn.com", "foxnews.com"), next_domain, "non")) %>% 
-  mutate(next_domain=case_when(next_domain=="google.com" ~ "Google",
+  mutate(next_domain=case_when(next_domain=="google.com" ~ "Browsing",
                                next_domain=="cnn.com" ~ "CNN",
                                next_domain=="foxnews.com" ~ "Fox News",
                                TRUE ~ next_domain))
@@ -238,9 +238,6 @@ ggplot(top3 %>% filter( prev_domain != "non", next_domain != "non", disinformati
        x = "Paths",
        title = "Alluvial Diagram of Disinformation Visits",
        fill = "Political affiliation")
-
-
-
 
 
 #Disinformation visits
