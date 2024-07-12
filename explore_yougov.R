@@ -19,7 +19,21 @@ explore_yougov <- classify_yougov %>%
   mutate( label = case_when( label == "left bias" ~ "Left Bias",
                              label == "right bias" ~ "Right Bias",
                              TRUE ~ label )) %>% 
-  mutate(next_label = lead(label))
+  mutate(next_label = lead(label)) %>% 
+  mutate( prev_domain = lag( extension ), next_domain = lead( extension )) %>% 
+  mutate(prev_domain=ifelse(prev_domain %in% c("google.com", "youtube.com", "facebook.com"), prev_domain, "non")) %>% 
+  mutate(prev_domain=case_when(prev_domain=="google.com" ~ "Google",
+                               prev_domain=="youtube.com" ~ "Youtube",
+                               prev_domain=="facebook.com" ~ "Facebook",
+                               TRUE ~ prev_domain)) %>%
+  mutate(disinformation=case_when(extension=="cnn.com" ~ "CNN",
+                                  extension=="foxnews.com" ~ "Fox News",
+                                  TRUE ~ extension)) %>% 
+  mutate(disinformation = ifelse(disinformation %in% c("CNN", "Fox News"), disinformation, "non"))
+
+
+
+
 
 ####### ####### ####### ####### ####### ####### ####### 
 ####### ####### Creating the Alluvial Diagrams #######
@@ -35,8 +49,12 @@ explore_yougov <- bind_rows(
     ref_media == "referrals" & other != "socialmedia" ~ "Referrals",
     ref_media != "referrals" & other == "socialmedia" ~ "Social Media",
     ref_media == "referrals" & is.na(other) ~ "Referrals",
-    is.na(ref_media) & other == "socialmedia" ~ "Social Media"
-  ))
+    is.na(ref_media) & other == "socialmedia" ~ "Social Media")) %>% 
+  mutate(next_domain=ifelse(next_domain %in% c("google.com", "cnn.com", "foxnews.com"), next_domain, "non")) %>% 
+  mutate(next_domain=case_when(next_domain=="google.com" ~ "Browsing",
+                               next_domain=="cnn.com" ~ "CNN",
+                               next_domain=="foxnews.com" ~ "Fox News",
+                               TRUE ~ next_domain))
 
 foo <- explore_yougov %>% 
   mutate(axis2 = ifelse(next_label %in% c("Left Bias", "Right Bias"), next_label, "non")) %>% 
@@ -48,6 +66,10 @@ tallied_data <- foo %>%
 
 tallied_data %>% mutate( slant = case_when( slant == "slant" ~ "Political Affiliation", TRUE ~ slant ))
 
+#Disinformation visit dataset for the graph
+top3 <- explore_yougov %>% 
+  group_by(prev_domain, next_domain, slant, disinformation) %>% 
+  tally()
 
 # Plot with updated colors
 ggplot(tallied_data %>% drop_na(type) %>% filter(axis2 != "non"), aes(axis1 = type, axis2 = axis2, y = n)) +
@@ -67,36 +89,44 @@ ggplot(tallied_data %>% drop_na(type) %>% filter(axis2 != "non"), aes(axis1 = ty
 ##### Partisanship graph
 
 
-partisanship <- explore_yougov %>%
+ideology <- explore_yougov %>%
   filter( ref_media == "media" ) %>%
-  group_by( domain, slant ) %>%
+  group_by( extension, slant ) %>%
   summarize( n = n_distinct(person_id) ) %>%
   mutate( total = sum(n), pct = n/total ) %>%
   filter( total >= 10 ) %>%
   arrange( desc( pct ) ) %>%
   slice_head(n=1) %>%
-  select( domain, partisanship = slant )
+  select( extension, ideology = slant )
 
-foo <- left_join( foo, partisanship, by = "domain")
+foo <- left_join( foo, ideology, by = "extension")
 
 tallied_data_foo <- foo %>% 
-  group_by( partisanship, axis2, slant) %>% 
+  group_by( ideology, axis2, slant) %>% 
   tally()
 
 
 
-ggplot( tallied_data_foo %>% drop_na(partisanship) %>%  filter(axis2 != "non", partisanship != "Neutral"), aes( axis1 = partisanship, axis2 = axis2, y = n)) +
+ggplot( tallied_data_foo %>% drop_na(ideology) %>%  filter(axis2 != "non", ideology != "Neutral"), aes( axis1 = ideology, axis2 = axis2, y = n)) +
   geom_alluvium(aes(fill=slant)) +
   scale_fill_manual( values = c( "blue", "grey", "red")) + 
   geom_stratum() +
   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
-  scale_x_discrete(limits = c("Type", "Disinformation"), expand = c(0.15, 0.05)) +
+  scale_x_discrete(limits = c("Ideology media", "Disinformation"), expand = c(0.15, 0.05)) +
   theme_minimal() +
   theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
   labs(y = "Number of Visits",
        x = "Paths",
-       title = "Alluvial Diagram of Partisan Visits",
-       fill = "Political Affiliation")
+       title = "Alluvial Diagram of Ideology media Visits",
+       fill = "Political affiliation")
+
+
+
+
+
+
+
+
 
 
 ####### ############################################### ####### 
