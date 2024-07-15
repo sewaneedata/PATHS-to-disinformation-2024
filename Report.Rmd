@@ -1,8 +1,10 @@
-
-## Final Report 
+---
+title: "Final Report"
+output: tint::tintHtml
+---
 
 ### Introduction 
-<<<<<<< HEAD
+
 This project, PATHS to disinformation, analyzed two data sets brought by YouGov (370 participants) and Forthright (584 participants) that track the browsing history of the participants. The aims for this analysis was to track the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between those individuals and their political afflitaiton, which was also brought by our two data sets. 
 
 ### Methodology
