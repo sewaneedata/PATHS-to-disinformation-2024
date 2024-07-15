@@ -1,6 +1,7 @@
 ## Report 
 
 ### Introduction 
+<<<<<<< HEAD
 This project, PATHS to disinformation, analyzed two data sets brought by YouGov (370 participants) and Forthright (584 participants) that track the browsing history of the participants. The aims for this analysis was to track the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between those individuals and their political afflitaiton, which was also brought by our two data sets. 
 
 ### Methodology
@@ -10,3 +11,6 @@ This project, PATHS to disinformation, analyzed two data sets brought by YouGov 
 
 
 ### Conclusion
+=======
+This project, PATHS to disinformation, analyzed two data sets brought by YouGov (370 participants) and Forthright (584 participants) that track the browsing history of the participants. The aims for this analysis was to track the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between those individuals and their political afflitaiton, which was also brought by our data. 
+>>>>>>> 16008255607e5f426c8ce5fc9eb0f8b1441e91ca
