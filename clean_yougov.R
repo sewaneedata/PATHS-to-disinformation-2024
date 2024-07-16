@@ -45,6 +45,7 @@ write_csv(disinformation, "data/disinformation.csv")
 
 ###CLEAN YOUGOV-----
 load("data/YouGov/yougov_webtracking.RData")
+paths_to_disinformation <- read.csv("data/paths_to_disinformation.csv")
 
 #Filter USA
 webtracking <- webtracking %>% 
