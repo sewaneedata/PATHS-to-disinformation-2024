@@ -66,8 +66,8 @@ ggplot(paths_2 %>% drop_na(ideology) %>% filter( axis2 != "non", ideology!="Neut
        fill = "Political affiliation")
 ```
 
-Majority of audience's visits coming from Google but there's more left wing visits than right wing visits. However, left wing's visits splitted half-half after coming to CNN, as half of them keep staying on the site and other half continue browsing. For right wing visits, they are consistent with their news and tend to stay on their site more. Moreover, none of them visit opposed disinformation site after their first visit to their media.
-The partisan media visits's shows that most of media in the Forthright dataset is classified as right wing media, but its audience media's choice is well-coordinated, as they seem to only visit their biased site.
+The majority of the digital paths in our data sets have their starting point at google, with higher traffic coming from individuals who consider themselves right wing. For the left wing individuals, they split into halves after they arrive to CNN, with one half staying there and the other continuing browsing. On the other hand, the right wing individuals had more consistency in their browsing and news visits. They tend to stay on more on the sites that align with their ideologies, moreover none of them visited opposing disinformation sites after their first visit to their similarly-aligned media.
+The partisan media visits show that most of media in the Forthright data set is classified as right wing media, but its audience media's choice is well-coordinated, as they seem to only visit their biased site.
 
 
 ### Conclusion
