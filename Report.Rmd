@@ -125,9 +125,10 @@ ggplot( path_2 %>% drop_na(ideology) %>%  filter(axis2 != "non", ideology != "ne
 ```
 
 
-YouGov:
-In the YouGov dataset, the paths taken by individuals who consider themselves left-wing are inconsistent and more free-flowing. The majority of them start at Facebook and then move to Fox News. Interestingly, there is a high percentage of left-wing individuals who stay on Fox News, even surpassing right-wing visits to Fox News in the final column. In contrast, individuals who consider themselves right-wing exhibit more consistency in their online pathways, with only a small percentage visiting CNN.
-The analysis of partisan media visits from YouGov indicates that there is more left-aligned media than right-aligned media. Overall, this reinforces the idea that the right-wing audience is more coordinated compared to the left-wing audience.
+In the YouGov dataset, the paths taken by the participants, whether they are left-wing or right-wing, were consistent. Audiences tend to stick to their preferred media diet, as right-wing individuals prefer Fox News (right-biased site) and left-wing individuals prefer CNN (left-biased site). Surprisingly, more right-wing individuals stay on their similarly-aligned media site compared to left wing. As in the case of left-wing individuals, the majority prefer to continue browsing after.
+
+The analysis of partisan media visits from YouGov indicates that there is more left-aligned media than right-aligned media. However, no matter which of the biases they lean towards, audiences from both sides still prefer their similarly-aligned news source more. 
+
 
 
 ### Conclusion
