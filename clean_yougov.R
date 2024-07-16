@@ -44,7 +44,9 @@ disinformation <- bind_rows(disinformation, wp3_list_alternative_media %>% selec
 write_csv(disinformation, "data/disinformation.csv") 
 
 ###CLEAN YOUGOV-----
+# this is an edited version of the Webtracking dataset that Dr. Rudd gave to us
 load("data/YouGov/yougov_webtracking.RData")
+#A cleaned CSV provided to us by Dr. Rudd
 paths_to_disinformation <- read.csv("data/paths_to_disinformation.csv")
 
 #Filter USA
