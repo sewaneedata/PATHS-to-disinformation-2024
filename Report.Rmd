@@ -16,7 +16,7 @@ load("data/explore_forthright.RData")
 
 ### Introduction 
 
-This project, PATHS to Disinformation, analyzed two datasets provided by YouGov (370 participants) and Forthright (584 participants) that tracked the participants' browsing histories in a period that spanned 3-4 months. The goals of this analysis were to map the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between their political affiliations and their exposure to disinformation.
+This project, PATHS to Disinformation, analyzed two datasets provided by YouGov (370 participants) and Forthright (584 participants) that tracked the participants' browsing histories in a period that spanned 3-4 months. The goals of this analysis is to map the digital pathways of individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between their political affiliations and their exposure to disinformation.
 
 
 ### Methodology
@@ -31,9 +31,9 @@ The third script, `table_yougov.R`, offers a more effective way to visualize sur
 
 For the Forthright dataset, the first script, `clean_forthright.R`, produces the file `forthright_Ideology.RData`. This script combines the `member_id` from the web tracking data with the `member_id` from the Forthright survey to incorporate Ideology data. It also uses the cleaned version of the disinformation list from `clean_yougov.R` for site classification.
 
-In the second script, `explore_forthright.R`, the focus is on examining the behavior of users who visited disinformation sites by using both the Ideology list and the disinformation list. A key element of this script is the creation of Alluvial Diagrams to illustrate paths to disinformation. The latter part of the script includes analysis answering questions about the data, such as the number of users who accessed fake news sites.
+In the second script, `explore_forthright.R`, the focus is on examining the behavior of users who visited disinformation sites by using both the Ideology list and the disinformation list. A key element of this script is the creation of Alluvial Diagrams to illustrate paths to disinformation. The later part of the script includes a basic analysis about the data, such as the number of users who accessed fake news sites.
 
-The third script, `table_forthright.R`, enhances the visualization of survey responses by generating a detailed table. This script aims to provide a clear and comprehensive display of the survey data.
+The third script, `table_forthright.R`, enhances the visualization of survey responses by generating a detailed table. This script aims to provide a clear and comprehensive display table of the survey data.
 
 ### Visualizations
 
