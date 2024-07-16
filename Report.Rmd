@@ -88,3 +88,6 @@ The analysis of partisan media visits from YouGov indicates that there is more l
 
 
 ### Conclusion
+
+We reached the conclusion that the start site/platform is accessed by 3 types of politically affiliated individuals: neutral, left-leaning, and right-leaning. The majority of the pathways followed by right-leaning individuals stay consistent until they arrive at a source of disinformation. Individuals start either Facebook (right-leaning), Google (right-leaning), or YouTube (left-leaning), which is followed by the arrival at a news source that specifically leads individuals to disinformation. After that, people will either keep searching for more news on the same site which widens the spread of disinformation, or just simply click out the site. 
+Our analysis process was slowed down for two reasons. First,the list provided on all sites in the dataset classifying whether they were considered reliable or unreliable seemed outdated and unreliable in itself, and some sites like the food.news, for instance, is labeled as pseudoscience or conspiracy site, which can skew findings. Second, certain news sites that were not labeled as left or right-wing were not used, therefore, losing certain pieces of data in translation.
