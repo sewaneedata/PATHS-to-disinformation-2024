@@ -47,7 +47,7 @@ write_csv(disinformation, "data/disinformation.csv")
 # this is an edited version of the Webtracking dataset that Dr. Rudd gave to us
 load("data/YouGov/yougov_webtracking.RData")
 #A cleaned CSV provided to us by Dr. Rudd
-paths_to_disinformation <- read.csv("data/paths_to_disinformation.csv")
+#paths_to_disinformation <- read.csv("data/paths_to_disinformation.csv")
 
 #Filter USA
 webtracking <- webtracking %>% 
@@ -68,7 +68,7 @@ names(disinformation) <- c("extension", #url
                            "harm_score", 
                            "type" )
 #Join label
-yougov_label <- paths_to_disinformation %>% 
+yougov_label <- paths_us %>% 
   left_join(disinformation %>% select( extension, label ), by="extension") 
 
 ####IDEOLOGY----
@@ -84,9 +84,9 @@ yougov_ideology <- merged_data %>%
   select(everything(), q12_ideology) %>% 
   filter(iso2 == 'US') %>%  
   mutate (slant = case_when(
-    q12_ideology <= 4 ~ "left",
-    q12_ideology == 5 ~ "neutral",
-    q12_ideology >= 6 ~ "right"),
+    q12_ideology <= 4 ~ "Left wing",
+    q12_ideology == 5 ~ "Neutral",
+    q12_ideology >= 6 ~ "Right wing"),
     left = as.numeric(q12_ideology <= 4),
     neutral = as.numeric(q12_ideology == 5),
     right = as.numeric(q12_ideology >= 6))

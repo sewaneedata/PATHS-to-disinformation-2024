@@ -2,8 +2,10 @@ library(tidyverse)
 library(readxl)
 library(ggalluvial)
 
+
+# make sure to move the created datasets to the data folder!
 # Load data
-ideology <- load("data/yougov_ideology.RData")
+load("data/yougov_ideology.RData")
 classify_yougov <- read_csv("data/classify_yougov.csv")
 
 # Join data
@@ -56,20 +58,36 @@ explore_yougov <- bind_rows(
                                next_domain=="foxnews.com" ~ "Fox News",
                                TRUE ~ next_domain))
 
-foo <- explore_yougov %>% 
+explore_yougov <- explore_yougov %>% 
   mutate(axis2 = ifelse(next_label %in% c("Left Bias", "Right Bias"), next_label, "non")) %>% 
   mutate(type = factor(type, levels = c("Referrals", "Social Media", "Both")))
 
-tallied_data <- foo %>% 
+path_1 <- explore_yougov %>% 
   group_by(type, axis2, slant) %>% 
   tally()
 
-tallied_data %>% mutate( slant = case_when( slant == "slant" ~ "Political Affiliation", TRUE ~ slant ))
+path_1 <- path_1 %>% mutate( slant = case_when( slant == "slant" ~ "Political Affiliation", TRUE ~ slant ))
 
 #Disinformation visit dataset for the graph
-top3 <- explore_yougov %>% 
+top_3 <- explore_yougov %>% 
   group_by(prev_domain, next_domain, slant, disinformation) %>% 
   tally()
+
+#Disinformation visits
+ggplot(top_3 %>% filter( prev_domain != "non", next_domain != "non", disinformation != "non", !is.na(slant)), aes(axis1 = prev_domain, axis2 = disinformation, axis3=next_domain, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c("blue", "grey", "red") ) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Previous", "Current", "Next"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(family = "Times New Roman")) + 
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Disinformation Visits",
+       fill = "Political affiliation")
+
 
 # Plot with updated colors
 ggplot(tallied_data %>% drop_na(type) %>% filter(axis2 != "non"), aes(axis1 = type, axis2 = axis2, y = n)) +
@@ -98,34 +116,28 @@ ideology <- explore_yougov %>%
   arrange( desc( pct ) ) %>%
   slice_head(n=1) %>%
   select( extension, ideology = slant )
+  
 
-foo <- left_join( foo, ideology, by = "extension")
+explore_yougov <- left_join( explore_yougov, ideology, by = "extension")
 
-tallied_data_foo <- foo %>% 
+path_2 <- explore_yougov %>% 
   group_by( ideology, axis2, slant) %>% 
   tally()
 
 
 
-ggplot( tallied_data_foo %>% drop_na(ideology) %>%  filter(axis2 != "non", ideology != "Neutral"), aes( axis1 = ideology, axis2 = axis2, y = n)) +
+ggplot( path_2 %>% drop_na(ideology) %>%  filter(axis2 != "non", ideology != "neutral"), aes( axis1 = ideology, axis2 = axis2, y = n)) +
   geom_alluvium(aes(fill=slant)) +
   scale_fill_manual( values = c( "blue", "grey", "red")) + 
   geom_stratum() +
   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
-  scale_x_discrete(limits = c("Ideology media", "Disinformation"), expand = c(0.15, 0.05)) +
+  scale_x_discrete(limits = c("Partisan media", "Disinformation"), expand = c(0.15, 0.05)) +
   theme_minimal() +
   theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
   labs(y = "Number of Visits",
        x = "Paths",
-       title = "Alluvial Diagram of Ideology media Visits",
+       title = "Alluvial Diagram of Partisan Media Visits",
        fill = "Political affiliation")
-
-
-
-
-
-
-
 
 
 
@@ -265,3 +277,6 @@ explore_yougov %>%
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(10)
+
+#Save dataset
+save(explore_yougov, file="data/explore_yougov.RData")
