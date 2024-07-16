@@ -3,14 +3,69 @@ title: "Final Report"
 output: tint::tintHtml
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(ggalluvial)
+
+
+# load your data here 
+load("data/explore_forthright.RData")
+#load("data/") # for YouGov
+```
+
 ### Introduction 
 
 This project, PATHS to disinformation, analyzed two data sets provided by YouGov (370 participants) and Forthright (584 participants) that track the browsing history of the participants. The aims for this analysis was to track the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between those individuals and their political afflitaiton, which was also provided by our data.  
 
 ### Methodology
 
+We use 
 
-### Findings
+### Visualizations
+
+#### Forthright dataset
+```{r}
+
+# code goes here to make the alluvial diagrams of disinformation visit
+top3 <- explore_forthright %>% 
+  group_by(prev_domain, next_domain, slant, disinformation) %>% 
+  tally()
+
+ggplot(top3 %>% filter( prev_domain != "non", next_domain != "non", disinformation != "non"), aes(axis1 = prev_domain, axis2 = disinformation, axis3=next_domain, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c("blue", "grey", "red") ) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Previous", "Current", "Next"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(family = "Times New Roman")) + 
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Disinformation Visits",
+       fill = "Political affiliation")
+
+# code goes here to make the alluvial diagrams of partisan media visit
+paths_2 <- explore_forthright %>% 
+  group_by(ideology, axis2, slant) %>% 
+  tally()
+
+ggplot(paths_2 %>% drop_na(ideology) %>% filter( axis2 != "non", ideology!="Neutral"), aes(axis1 = ideology, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c("blue", "grey", "red") ) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Partisan media", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(family = "Times New Roman")) + 
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Partisan Media Visits",
+       fill = "Political affiliation")
+```
+
 
 
 ### Conclusion
