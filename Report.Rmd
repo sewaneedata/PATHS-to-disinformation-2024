@@ -11,12 +11,16 @@ library(ggalluvial)
 
 # load your data here 
 load("data/explore_forthright.RData")
-#load("data/") # for YouGov
+load("data/explore_yougov.RData")
 ```
 
 ### Introduction 
 
+<<<<<<< HEAD
 This project, PATHS to Disinformation, analyzed two datasets provided by YouGov (370 participants) and Forthright (584 participants) that tracked the participants' browsing histories in a period that spanned 3-4 months. The goals of this analysis is to map the digital pathways of individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between their political affiliations and their exposure to disinformation.
+=======
+This project, PATHS to Disinformation, analyzed two datasets provided by YouGov and Forthright (~700 participants) that tracked the participants' browsing histories in a period that spanned 3-4 months. The goals of this analysis were to map the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between their political affiliations and their exposure to disinformation.
+>>>>>>> 59043ac74a055e1f5abe1b822517a2f9ff9f8ad3
 
 
 ### Methodology
@@ -78,12 +82,53 @@ ggplot(paths_2 %>% drop_na(ideology) %>% filter( axis2 != "non", ideology!="Neut
        title = "Partisan Media Visits",
        fill = "Political affiliation")
 ```
+
 Forthright:
 The majority of the digital pathways in the Forthright dataset start at Google, with higher traffic coming from individuals who consider themselves right-wing. For left-wing individuals, their paths split into two main routes after arriving at CNN: one group stays there, while the other continues browsing. In contrast, right-wing individuals display more consistency in their browsing and news visits. They tend to stay on sites that align with their ideologies, and none of them visited opposing disinformation sites after their initial visit to ideologically similar media.
 Partisan media visits reveal that most of the media in the Forthright dataset is classified as right-wing. Additionally, the media choices of the audience are highly coordinated, as they primarily visit biased sites that reinforce their existing beliefs.
 
+
+```{r}
+#Disinformation visits
+top_3 <- explore_yougov %>%
+  group_by(prev_domain, next_domain, slant, disinformation) %>%
+  tally()
+
+ggplot(top_3 %>% filter( prev_domain != "non", next_domain != "non", disinformation != "non", !is.na(slant)), aes(axis1 = prev_domain, axis2 = disinformation, axis3=next_domain, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c("blue", "grey", "red") ) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Previous", "Current", "Next"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(family = "Times New Roman")) +
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Disinformation Visits",
+       fill = "Political affiliation")
+
+# code goes here to make the alluvial diagrams of partisan media visit
+path_2 <- explore_yougov %>%
+  group_by( ideology, axis2, slant) %>%
+  tally()
+
+ggplot( path_2 %>% drop_na(ideology) %>%  filter(axis2 != "non", ideology != "neutral"), aes( axis1 = ideology, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c( "blue", "grey", "red")) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Partisan media", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Alluvial Diagram of Partisan Media Visits",
+       fill = "Political affiliation")
+```
+
 YouGov:
-In the YouGov dataset, the paths taken by individuals who consider themselves left-wing are inconsistent and more free-flowing. The majority of them start at Facebook and then move to Fox News. Interestingly, there is a high percentage of left-wing individuals who stay on Fox News, even surpassing right-wing visits to Fox News in the final column. In contrast, individuals who consider themselves right-wing exhibit more consistency in their online pathways, with only a small percentage visiting CNN.
+In the YouGov dataset, the paths taken by the participants, whether they are left-wing or right-wing were consistent. Interestingly, there is a high percentage of left-wing individuals who stay on Fox News (right-leaning), even surpassing right-wing visits to Fox News in the final column. In contrast, individuals who consider themselves right-wing exhibit more consistency in their online pathways, with only a small percentage visiting CNN.
 The analysis of partisan media visits from YouGov indicates that there is more left-aligned media than right-aligned media. Overall, this reinforces the idea that the right-wing audience is more coordinated compared to the left-wing audience.
 
 
