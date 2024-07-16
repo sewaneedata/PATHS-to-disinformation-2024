@@ -1,13 +1,17 @@
+
+# This script will combine disinformation sources that is provided to us and clean YouGov's dataset
+
 #Load library
 library(tidyverse)
+library(readxl)
+
+###COMBINE DISINFORMATION SOURCES-----
 
 disinformation <- read_csv("data/disinformation_domains_clean.csv")
 
 #Remove Italian domains (butac, bufale, bufalopedia)
 disinformation <- disinformation %>% 
   filter (!source %in% c("butac", "bufale", "bufalopedia"))
-#Checking
-table(disinformation$source)
 
 #W3P media
 wp3_list_media <- readxl::read_excel("data/LISTS/WP3_list_media.xlsx")
@@ -39,28 +43,60 @@ disinformation <- bind_rows(disinformation, wp3_list_alternative_media %>% selec
 #Save disinformation sources
 write_csv(disinformation, "data/disinformation.csv") 
 
-#Load webtrackings
+###CLEAN YOUGOV-----
+# this is an edited version of the Webtracking dataset that Dr. Rudd gave to us
 load("data/YouGov/yougov_webtracking.RData")
+#A cleaned CSV provided to us by Dr. Rudd
+paths_to_disinformation <- read.csv("data/paths_to_disinformation.csv")
 
 #Filter USA
 webtracking <- webtracking %>% 
   filter(iso2=="US")
 
-
 #Identified people that accessed misinformation sources
 filtered_us <- webtracking %>% filter (extension %in% disinformation$url )
-
 
 #Identify paths of people visited misinformation sources
 paths_us <- webtracking %>% filter ( person_id %in% filtered_us$person_id )
 
+###CLASSIFY LABEL FOR DISINFORMATION SOURCES----
+#Rename
+names(disinformation) <- c("extension", #url 
+                           "label", 
+                           "source", 
+                           "last_update", 
+                           "harm_score", 
+                           "type" )
+#Join label
+yougov_label <- paths_to_disinformation %>% 
+  left_join(disinformation %>% select( extension, label ), by="extension") 
+
+####IDEOLOGY----
+#getting YouGov ideology column 
+survey_info <- read.csv("data/YouGov/US_survey.csv")
+survey_info <- survey_info %>% mutate( person_id = tolower( person_id) )
+# Perform the left join
+merged_data <- webtracking %>%
+  left_join(survey_info %>% select(person_id, q12_ideology), by = "person_id")
+
+
+yougov_ideology <- merged_data %>%
+  select(everything(), q12_ideology) %>% 
+  filter(iso2 == 'US') %>%  
+  mutate (slant = case_when(
+    q12_ideology <= 4 ~ "left",
+    q12_ideology == 5 ~ "neutral",
+    q12_ideology >= 6 ~ "right"),
+    left = as.numeric(q12_ideology <= 4),
+    neutral = as.numeric(q12_ideology == 5),
+    right = as.numeric(q12_ideology >= 6))
+
+
 #Save data
 write_csv( paths_us, "data/paths_to_disinformation.csv")
+write_csv(yougov_label, "data/classify_yougov.csv")
+save(yougov_ideology, file ="yougov_ideology.RData")
 
-
-# Count the number of rows where person_id has more than 12 characters
-paths_us %>%
-  summarize(count = sum(nchar(person_id) > 12))
 
 
 

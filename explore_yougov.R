@@ -1,13 +1,137 @@
 library(tidyverse)
+library(readxl)
+library(ggalluvial)
+
+# Load data
 ideology <- load("data/yougov_ideology.RData")
 classify_yougov <- read_csv("data/classify_yougov.csv")
 
+# Join data
 yougov_join <- yougov_ideology %>% 
   select(person_id, q12_ideology, slant) %>%
   distinct() 
 
+
+
 explore_yougov <- classify_yougov %>% 
-  left_join(yougov_join, by="person_id")
+  left_join(yougov_join, by="person_id") %>% 
+  arrange(person_id, start_time) %>% 
+  mutate( label = case_when( label == "left bias" ~ "Left Bias",
+                             label == "right bias" ~ "Right Bias",
+                             TRUE ~ label )) %>% 
+  mutate(next_label = lead(label)) %>% 
+  mutate( prev_domain = lag( extension ), next_domain = lead( extension )) %>% 
+  mutate(prev_domain=ifelse(prev_domain %in% c("google.com", "youtube.com", "facebook.com"), prev_domain, "non")) %>% 
+  mutate(prev_domain=case_when(prev_domain=="google.com" ~ "Google",
+                               prev_domain=="youtube.com" ~ "Youtube",
+                               prev_domain=="facebook.com" ~ "Facebook",
+                               TRUE ~ prev_domain)) %>%
+  mutate(disinformation=case_when(extension=="cnn.com" ~ "CNN",
+                                  extension=="foxnews.com" ~ "Fox News",
+                                  TRUE ~ extension)) %>% 
+  mutate(disinformation = ifelse(disinformation %in% c("CNN", "Fox News"), disinformation, "non"))
+
+
+
+
+
+####### ####### ####### ####### ####### ####### ####### 
+####### ####### Creating the Alluvial Diagrams #######
+####### ####### ####### ####### ####### ####### ####### 
+
+explore_yougov <- bind_rows(
+  explore_yougov %>% filter(!is.na(label), page_duration > 4),
+  explore_yougov %>% filter(is.na(label))
+) %>% 
+  arrange(person_id, start_time) %>% 
+  mutate(type = case_when(
+    ref_media == "referrals" & other == "socialmedia" ~ "Both",
+    ref_media == "referrals" & other != "socialmedia" ~ "Referrals",
+    ref_media != "referrals" & other == "socialmedia" ~ "Social Media",
+    ref_media == "referrals" & is.na(other) ~ "Referrals",
+    is.na(ref_media) & other == "socialmedia" ~ "Social Media")) %>% 
+  mutate(next_domain=ifelse(next_domain %in% c("google.com", "cnn.com", "foxnews.com"), next_domain, "non")) %>% 
+  mutate(next_domain=case_when(next_domain=="google.com" ~ "Browsing",
+                               next_domain=="cnn.com" ~ "CNN",
+                               next_domain=="foxnews.com" ~ "Fox News",
+                               TRUE ~ next_domain))
+
+foo <- explore_yougov %>% 
+  mutate(axis2 = ifelse(next_label %in% c("Left Bias", "Right Bias"), next_label, "non")) %>% 
+  mutate(type = factor(type, levels = c("Referrals", "Social Media", "Both")))
+
+tallied_data <- foo %>% 
+  group_by(type, axis2, slant) %>% 
+  tally()
+
+tallied_data %>% mutate( slant = case_when( slant == "slant" ~ "Political Affiliation", TRUE ~ slant ))
+
+#Disinformation visit dataset for the graph
+top3 <- explore_yougov %>% 
+  group_by(prev_domain, next_domain, slant, disinformation) %>% 
+  tally()
+
+# Plot with updated colors
+ggplot(tallied_data %>% drop_na(type) %>% filter(axis2 != "non"), aes(axis1 = type, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill = slant)) +
+  scale_fill_manual( values = c( "blue", "grey", "red")) + 
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Type", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Alluvial Diagram of Domain Media Visits",
+       fill = "Political Affiliation")
+
+
+##### Partisanship graph
+
+
+ideology <- explore_yougov %>%
+  filter( ref_media == "media" ) %>%
+  group_by( extension, slant ) %>%
+  summarize( n = n_distinct(person_id) ) %>%
+  mutate( total = sum(n), pct = n/total ) %>%
+  filter( total >= 10 ) %>%
+  arrange( desc( pct ) ) %>%
+  slice_head(n=1) %>%
+  select( extension, ideology = slant )
+
+foo <- left_join( foo, ideology, by = "extension")
+
+tallied_data_foo <- foo %>% 
+  group_by( ideology, axis2, slant) %>% 
+  tally()
+
+
+
+ggplot( tallied_data_foo %>% drop_na(ideology) %>%  filter(axis2 != "non", ideology != "Neutral"), aes( axis1 = ideology, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c( "blue", "grey", "red")) + 
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Ideology media", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom", text = element_text(family = "Times New Roman")) +
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Alluvial Diagram of Ideology media Visits",
+       fill = "Political affiliation")
+
+
+
+
+
+
+
+
+
+
+####### ############################################### ####### 
+####### ####### ####### Exploring the data in R ###############
+####### ################################################ ####### 
 
 # how many people in the data set?? 370, 1:49 - 450
 total_people <- yougov_ideology %>% 
@@ -20,16 +144,10 @@ total_people
 # how many people have visited fake news sources? - 333
 fake_news_visitors <- explore_yougov %>% 
   filter(!is.na( slant)) %>%
-  filter(label == 'fake' & page_duration > 6) %>% 
-  summarise(unique_ids = n_distinct(person_id)) %>% 
-  pull(unique_ids)
-
+  filter(page_duration > 8) %>% 
+  summarise(unique_ids = n_distinct(person_id))
+  
 fake_news_visitors
-
-
-
-
-
 
 # 75% of people visted fake news sites
 fake_news_visitors / total_people
@@ -106,7 +224,8 @@ explore_yougov %>%
 explore_yougov %>% 
   filter(!is.na(label)) %>% 
   group_by(label) %>% 
-  tally()
+  tally() %>% 
+  arrange(desc(n))
 
 
 
@@ -146,199 +265,3 @@ explore_yougov %>%
   summarise(visits=n()) %>% 
   arrange(desc(visits)) %>% 
   head(10)
-
-
-
-
-
-
-
-
-##Experiment more-----------------------------
-#install.packages('readxl')
-library(readxl)
-screener_data <- read_excel("data/FORTHRIGHT/305021 - Consumer Digital Pilot - Screener Raw Data.xlsx")
-
-explore_forthright <- explore_forthright %>%
-  left_join(screener_data %>% select(member_id, Q8r5, Q9r3, Q12r3, Q12r4), by = "member_id")
-
-#How do you usually discern factually correct information in the media from information that is false? I rely on my gut feeling, and my own knowledge on the subject (5=Always). Results: right=30, neutral=11, left=17
-explore_forthright %>% 
-  filter(Q12r4==5) %>% 
-  group_by(slant) %>% 
-  distinct(member_id) %>% 
-  tally()
-#How do you usually discern factually correct information in the media from information that is false? I consult fact-checking websites in case of doubt (5=Always). Results: right=12, neutral=7, left=26
-explore_forthright %>% 
-  filter(Q12r3==5) %>% 
-  group_by(slant) %>% 
-  distinct(member_id) %>% 
-  tally()
-#How do you usually discern factually correct information in the media from information that is false? I consult fact-checking websites in case of doubt (5=Always). Results: right=39, neutral=14, left=12
-explore_forthright %>% 
-  filter(Q12r3==1) %>% 
-  group_by(slant) %>% 
-  distinct(member_id) %>% 
-  tally()
-#In your view, to be a good citizen, how important is it for a person to…Be skeptical of what the mainstream media report (5=Very important). Results: right=79, neutral=14, left=26
-explore_forthright %>% 
-  filter(Q9r3==5) %>% 
-  group_by(slant) %>% 
-  distinct(member_id) %>% 
-  tally()
-#I have a good knowledge of current affairs and political issues (5=Strongly agree). Results: right=33, neutral=9, left=32
-explore_forthright %>% 
-  filter(Q8r5==5) %>% 
-  group_by(slant) %>% 
-  distinct(member_id) %>% 
-  tally()
-
-#People who think it's very important to be skeptical and the site they visited
-explore_forthright %>% 
-  filter(Q9r3==5, !is.na(label)) %>% 
-  group_by(member_id, domain, label, slant) %>% 
-  summarise(visits=n()) %>% 
-  arrange(desc(visits)) %>% 
-  head(10)
-
-#People who always consult fact-checking websites in case of doubts and the site they visited
-explore_forthright %>% 
-  filter(Q12r3==5, !is.na(label)) %>% 
-  group_by(member_id, domain, label, slant) %>% 
-  summarise(visits=n()) %>% 
-  arrange(desc(visits)) %>% 
-  head(10)
-
-#Looking at Internal/External efficacy...
-sample <- explore_forthright %>% 
-  filter(!is.na(label)) %>% 
-  group_by(Q8r5, slant) %>% 
-  summarise(visits=n(), .groups="drop") 
-#Plot the data
-ggplot(data=sample, aes(x=Q8r5, y=visits, fill=slant))+
-  geom_col()+
-  labs(x="I have a good knowledge of current affairs and political issues", y="Visits", fill="Political affiliation")
-
-#Top 10 most visited site distribution
-top10 <- explore_forthright %>% 
-  filter(!is.na(label)) %>% 
-  group_by(domain) %>% 
-  #cbsnews has 3 NAs so we have to remove the NAs when we do calculations
-  summarise(total_visits=n(), 
-            left_visits=sum(slant=="Left wing", na.rm=TRUE), 
-            right_visits=sum(slant=="Right wing", na.rm=TRUE), 
-            neutral_visits=sum(slant=="Neutral", na.rm=TRUE)) %>%
-  arrange(desc(total_visits)) %>% 
-  head(10)
-#Plot the data
-ggplot( top10 %>% select(-total_visits) %>% pivot_longer( left_visits:neutral_visits ) ) +
-  geom_col( aes(y=domain, x=value, fill=name)  )
-
-#Looking at Internal/External efficacy without people with the most visited
-sample1 <- explore_forthright %>% 
-  filter(!is.na(label), ! member_id %in% c(6974012,5491081)) %>% 
-  group_by(Q8r5, slant) %>% 
-  summarise(visits=n(), .groups="drop") 
-ggplot(data=sample1, aes(x=Q8r5, y=visits, fill=slant))+
-  geom_col()+
-  labs(x="I have a good knowledge of current affairs and political issues", y="Visits", fill="Political affiliation")
-
-#How many disinformation sites that people visited in this dataset? Majority of these sites are left bias -> questionable sources -> right bias
-dis_sites<-explore_forthright %>% 
-  filter(!is.na(label)) %>% 
-  group_by(domain, label) %>% 
-  tally()
-table(dis_sites$label) #Check the label
-
-
-
-
-##Explore survey-------------
-#Create a dataset with variables that I want to look at
-explore_survey <- forthright_ideology %>% 
-  #If the person visit disinformation site, mark as 1, otherwise, mark as 0
-  mutate(dis=ifelse(forthright_ideology$member_id %in% forthright_label$member_id, 1, 0)) %>% 
-  select(member_id, slant, dis) %>% 
-  distinct()
-explore_survey <- explore_survey %>% 
-  left_join(screener_data %>% 
-              select(member_id,
-                     Q28, #Household income
-                     Q25, #Birth year
-                     QAGE, #Age group
-                     Q26, #Gender
-                     Q2, #How often do you intentionally try to avoid political news?
-                     Q6r1, #Interest in News about domestic or international politics
-                     Q6r2, #Economy, Business and financial news
-                     Q6r3, #Entertainment and celebrity news
-                     Q6r4, #Arts and culture news
-                     Q6r5, #Sports news
-                     Q6r6, #Science and technology news
-                     Q7, #Generally speaking, how interested are you in politics?
-                     Q27, #What is the highest degree or level of school you have completed?
-              ), by="member_id")
-#Create a new variable called "age"
-explore_survey<-explore_survey %>% 
-  mutate(age=2023-Q25)
-#What's the mean age?
-mean(explore_survey$age, na.rm = TRUE) #Big dataset--50.29725
-explore_survey %>%
-  filter(dis == 1) %>%
-  summarise(mean_age = mean(age, na.rm = TRUE)) #People visited disinformation sites--50.73839
-
-#Gender?
-table(explore_survey$Q26) 
-explore_survey %>%
-  filter(dis == 1) %>%
-  group_by(Q26) %>% tally() 
-
-#Distribution of age group?
-table(explore_survey$QAGE) 
-explore_survey %>%
-  filter(dis == 1) %>%
-  group_by(QAGE) %>% tally() 
-
-#Education level?
-table(explore_survey$Q27) 
-explore_survey %>%
-  filter(dis == 1) %>%
-  group_by(Q27) %>% tally() 
-
-#Import dataset
-member_demos <- read_excel("data/FORTHRIGHT/305021_Member_Demos.xlsx")
-explore_survey <- explore_survey %>% 
-  left_join(member_demos %>% select(member_id, race_id), by="member_id")
-
-
-#Save dataset
-save(explore_forthright, file="data/explore_forthright.RData")
-write_csv(explore_survey, "data/forthright_survey.csv")
-
-
-
-explore_yougov %>% 
-  #filter(!is.na(label)) %>% 
-  filter(ref_media == 'referrals') %>% 
-  group_by(domain) %>% 
-  tally() %>% 
-  arrange(desc(n))
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

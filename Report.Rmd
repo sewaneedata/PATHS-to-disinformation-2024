@@ -1,0 +1,93 @@
+---
+title: "Final Report"
+output: tint::tintHtml
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(ggalluvial)
+
+
+# load your data here 
+load("data/explore_forthright.RData")
+#load("data/") # for YouGov
+```
+
+### Introduction 
+
+This project, PATHS to Disinformation, analyzed two datasets provided by YouGov (370 participants) and Forthright (584 participants) that tracked the participants' browsing histories in a period that spanned 3-4 months. The goals of this analysis were to map the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between their political affiliations and their exposure to disinformation.
+
+
+### Methodology
+
+Based on the data provided by our client, we’ve made several adjustments across multiple scripts. Since we worked with two different web tracking processes, each dataset (YouGov and Forthright) has its own individual scripts that essentially perform the same functions. It’s advisable to start with the YouGov scripts, as they include the disinformation list and the WP3 list of media sources.
+
+The first script, `clean_yougov.R`, generates the file `yougov_Ideology.RData`. It merges the `person_id` from the web tracking data with the `person_id` from the YouGov survey, allowing us to incorporate the Ideology data. Additionally, this script creates a cleaned version of the disinformation list used for site classification.
+
+The second script, `explore_yougov.R`, utilizes both the Ideology list and the disinformation list to analyze users who visited disinformation sites. A significant portion of this script focuses on creating Alluvial Diagrams, which visualize the paths to disinformation. Towards the end, the script includes code that answers various questions about the data, such as how many individuals have visited fake news sources.
+
+The third script, `table_yougov.R`, offers a more effective way to visualize survey questions by creating a comprehensive table to display the responses.
+
+For the Forthright dataset, the first script, `clean_forthright.R`, produces the file `forthright_Ideology.RData`. This script combines the `member_id` from the web tracking data with the `member_id` from the Forthright survey to incorporate Ideology data. It also uses the cleaned version of the disinformation list from `clean_yougov.R` for site classification.
+
+In the second script, `explore_forthright.R`, the focus is on examining the behavior of users who visited disinformation sites by using both the Ideology list and the disinformation list. A key element of this script is the creation of Alluvial Diagrams to illustrate paths to disinformation. The latter part of the script includes analysis answering questions about the data, such as the number of users who accessed fake news sites.
+
+The third script, `table_forthright.R`, enhances the visualization of survey responses by generating a detailed table. This script aims to provide a clear and comprehensive display of the survey data.
+
+### Visualizations
+
+#### Forthright dataset
+```{r}
+
+# code goes here to make the alluvial diagrams of disinformation visit
+top3 <- explore_forthright %>% 
+  group_by(prev_domain, next_domain, slant, disinformation) %>% 
+  tally()
+
+ggplot(top3 %>% filter( prev_domain != "non", next_domain != "non", disinformation != "non"), aes(axis1 = prev_domain, axis2 = disinformation, axis3=next_domain, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c("blue", "grey", "red") ) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Previous", "Current", "Next"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(family = "Times New Roman")) + 
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Disinformation Visits",
+       fill = "Political affiliation")
+
+# code goes here to make the alluvial diagrams of partisan media visit
+paths_2 <- explore_forthright %>% 
+  group_by(ideology, axis2, slant) %>% 
+  tally()
+
+ggplot(paths_2 %>% drop_na(ideology) %>% filter( axis2 != "non", ideology!="Neutral"), aes(axis1 = ideology, axis2 = axis2, y = n)) +
+  geom_alluvium(aes(fill=slant)) +
+  scale_fill_manual( values = c("blue", "grey", "red") ) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Partisan media", "Disinformation"), expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(family = "Times New Roman")) + 
+  labs(y = "Number of Visits",
+       x = "Paths",
+       title = "Partisan Media Visits",
+       fill = "Political affiliation")
+```
+Forthright:
+The majority of the digital pathways in the Forthright dataset start at Google, with higher traffic coming from individuals who consider themselves right-wing. For left-wing individuals, their paths split into two main routes after arriving at CNN: one group stays there, while the other continues browsing. In contrast, right-wing individuals display more consistency in their browsing and news visits. They tend to stay on sites that align with their ideologies, and none of them visited opposing disinformation sites after their initial visit to ideologically similar media.
+Partisan media visits reveal that most of the media in the Forthright dataset is classified as right-wing. Additionally, the media choices of the audience are highly coordinated, as they primarily visit biased sites that reinforce their existing beliefs.
+
+YouGov:
+In the YouGov dataset, the paths taken by individuals who consider themselves left-wing are inconsistent and more free-flowing. The majority of them start at Facebook and then move to Fox News. Interestingly, there is a high percentage of left-wing individuals who stay on Fox News, even surpassing right-wing visits to Fox News in the final column. In contrast, individuals who consider themselves right-wing exhibit more consistency in their online pathways, with only a small percentage visiting CNN.
+The analysis of partisan media visits from YouGov indicates that there is more left-aligned media than right-aligned media. Overall, this reinforces the idea that the right-wing audience is more coordinated compared to the left-wing audience.
+
+
+### Conclusion
+
+We reached the conclusion that the start site/platform is accessed by 3 types of politically affiliated individuals: neutral, left-leaning, and right-leaning. The majority of the pathways followed by right-leaning individuals stay consistent until they arrive at a source of disinformation. Individuals start either Facebook (right-leaning), Google (right-leaning), or YouTube (left-leaning), which is followed by the arrival at a news source that specifically leads individuals to disinformation. After that, people will either keep searching for more news on the same site which widens the spread of disinformation, or just simply click out the site. 
+Our analysis process was slowed down for two reasons. First,the list provided on all sites in the dataset classifying whether they were considered reliable or unreliable seemed outdated and unreliable in itself, and some sites like the food.news, for instance, is labeled as pseudoscience or conspiracy site, which can skew findings. Second, certain news sites that were not labeled as left or right-wing were not used, therefore, losing certain pieces of data in translation.
