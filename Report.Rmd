@@ -9,6 +9,19 @@ This project, PATHS to disinformation, analyzed two data sets provided by YouGov
 
 ### Methodology
 
+Based on the data provided by our client, we’ve made several adjustments across multiple scripts. Since we worked with two different web tracking processes, each dataset (YouGov and Forthright) has scripts that essentially perform the same functions. It’s advisable to start with the YouGov scripts, including the disinformation list and the WP3 list of media sources.
+
+The first script, clean_yougov.R, generates the file yougov_Ideology.RData. It merges the person_id from the web tracking data with the person_id from the YouGov survey, allowing us to incorporate the Ideology data. Additionally, this script creates a cleaned version of the disinformation list used for site classification.
+
+The second script, explore_yougov.R, utilizes the Ideology and disinformation lists to analyze users who visited disinformation sites. Much of this script focuses on creating Alluvial Diagrams, which visualize the paths to disinformation. Towards the end, the script includes code that answers various questions about the data, such as how many individuals have visited fake news sources.
+
+The third script, table_yougov.R, offers a more effective way to visualize survey questions by creating a comprehensive table to display the responses.
+
+For the Forthright dataset, the first script, clean_forthright.R, produces the file forthright_Ideology.RData. This script combines the member_id from the web tracking data with the member_id from the Forthright survey to incorporate Ideology data. It also uses the cleaned version of the disinformation list from clean_yougov.R for site classification.
+
+In the second script, explore_forthright.R, the focus is on examining the behavior of users who visited disinformation sites using both the Ideology and disinformation lists. A vital element of this script is the creation of Alluvial Diagrams to illustrate paths to disinformation. The latter part of the script includes analysis and answering questions about the data, such as the number of users who accessed fake news sites.
+
+The third script, table_forthright.R, enhances the visualization of survey responses by generating a detailed table. This script aims to provide a clear and comprehensive display of the survey data.
 
 ### Findings
 
