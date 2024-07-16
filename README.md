@@ -21,6 +21,7 @@ To install and run this project:
 
 Mainly what most of the scripts on this repository do is clean the dense data sets that we had and put them in a state from which observations can be analyzed. Our observations/results are represented with alluvial diagrams of how people get to disinformation sites, from which relationships between political affiliations and the consumption of disinformation can be inferred.
 
+The data zip can be found in [this link](https://drive.google.com/drive/u/3/folders/17Mc1pOXn5D2gfnLgD6iWsDB3VuHIx9le) to the google drive in the data folder, If you need access, please contact datalab@sewanee.edu.
 
 # Paths Script Order
 
