@@ -16,7 +16,8 @@ load("data/explore_forthright.RData")
 
 ### Introduction 
 
-This project, PATHS to disinformation, analyzed two data sets provided by YouGov (370 participants) and Forthright (584 participants) that track the browsing history of the participants. The aims for this analysis was to track the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between those individuals and their political afflitaiton, which was also provided by our data.  
+This project, PATHS to Disinformation, analyzed two datasets provided by YouGov (370 participants) and Forthright (584 participants) that tracked the participants' browsing histories. The goals of this analysis were to map the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between their political affiliations and their exposure to disinformation.
+
 
 ### Methodology
 
@@ -66,13 +67,12 @@ ggplot(paths_2 %>% drop_na(ideology) %>% filter( axis2 != "non", ideology!="Neut
        fill = "Political affiliation")
 ```
 ForthWright:
-The majority of the digital paths in the ForthWright data set have their starting point at Google, with higher traffic coming from individuals who consider themselves right-wing. For the left-wing individuals, they split into halves after they arrive to CNN, with one half staying there and the other continuing browsing. On the other hand, the right-wing individuals had more consistency in their browsing and news visits. They tend to stay on more on the sites that align with their ideologies, moreover none of them visited opposing disinformation sites after their first visit to their similarly-aligned media.
-The partisan media visits show that most of media in the Forthright data set is classified as right-wing media, but its audience media's choice is well-coordinated, as they seem to only visit their biased site.
-
+The majority of the digital pathways in the Forthright dataset start at Google, with higher traffic coming from individuals who consider themselves right-wing. For left-wing individuals, their paths split into two main routes after arriving at CNN: one group stays there, while the other continues browsing. In contrast, right-wing individuals display more consistency in their browsing and news visits. They tend to stay on sites that align with their ideologies, and none of them visited opposing disinformation sites after their initial visit to ideologically similar media.
+Partisan media visits reveal that most of the media in the Forthright dataset is classified as right-wing. Additionally, the media choices of the audience are highly coordinated, as they primarily visit biased sites that reinforce their existing beliefs.
 
 YouGov:
-In the YouGov data set, the paths taken by individuals who consider themselves left-wing were inconsistent and more free-flowing, With the majority of them starting at Facebook, and then moving to Fox News. After that, there is a high percentage of left-wing individuals that stay on Fox News (even more left-wing visits than right-wing at the last column). On the other hand, individuals who consider themselves right-wing are consistent in their online pathways with a small percentage of those individuals visiting CNN.
-The partisan media visits from YouGov indicates that there’s more left-aligned media than right-aligned ones. Overall, it still reinforces that right-wing audience is more well-coordinated compared to left-wing audience.
+In the YouGov dataset, the paths taken by individuals who consider themselves left-wing are inconsistent and more free-flowing. The majority of them start at Facebook and then move to Fox News. Interestingly, there is a high percentage of left-wing individuals who stay on Fox News, even surpassing right-wing visits to Fox News in the final column. In contrast, individuals who consider themselves right-wing exhibit more consistency in their online pathways, with only a small percentage visiting CNN.
+The analysis of partisan media visits from YouGov indicates that there is more left-aligned media than right-aligned media. Overall, this reinforces the idea that the right-wing audience is more coordinated compared to the left-wing audience.
 
 
 ### Conclusion
