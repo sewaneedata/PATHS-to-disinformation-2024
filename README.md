@@ -3,7 +3,23 @@ A summer 2024 project in collaboration with DataLab and the Open University of C
 
 This is the repository for the PATHS to Disinformation 2024 project by Sewanee DataLab fellows. The project partner, Professor Ana Sofía Cardenal, is a political science professor at the Open University of Catalonia. Our partner requested an analysis of two data sets, brought by YouGov and Forthright (~700 participants), that track the participants' browsing history in a period that spanned 3-4 months. What our analysis targets is identifying the digital pathways that lead people to misinformation and to see how political ideology or partisanship can affect a person's internet behavior.   
 
-To run this code you have to install `RStudio` and install every library per each script. Mainly what most of the scripts on this repository do is clean the dense data sets that we had and put them in a state from which observations can be analyzed. Our observations/results are represented with alluvial diagrams of how people get to disinformation sites, from which relationships between political affiliations and the consumption of disinformation can be inferred.
+To install and run this project:
+1. Make sure you have git installed (Learn how to do that [here](https://github.com/git-guides/install-git)).  
+2. Install R Studio (Learn how to do that [here](https://posit.co/download/rstudio-desktop/)).  
+3. Open R Studio.  
+4. Clone our GitHub repository!  
+      1. Go to the Project tab in the upper right corner RStudio.  
+      2. Click New Project -> Version Control -> Git  
+      3. Enter the URL of our repository (https://github.com/sewaneedata/TN-disenfranchisement-2024/tree/main) and specify the directory where you want to clone the repository.  
+      4. Click Create Project!  
+5. Install the following dependencies using the install.packages() function. (You can also just run our "packages" script.)
+   1. "tidyverse"
+   2. "ggalluvial"
+   3. "readxl"
+   4. "kableExtra"
+
+
+Mainly what most of the scripts on this repository do is clean the dense data sets that we had and put them in a state from which observations can be analyzed. Our observations/results are represented with alluvial diagrams of how people get to disinformation sites, from which relationships between political affiliations and the consumption of disinformation can be inferred.
 
 
 # Paths Script Order
