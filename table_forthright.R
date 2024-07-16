@@ -1,12 +1,13 @@
 # This script provides discriptive tables about the information of those who were in the survey
 # for the Forthright Dataset
 #############################################################################################
+
 ####PEOPLE------
-#Load library
+# Load library
 library(tidyverse)
 library(kableExtra)
 
-#Import dataset that we want to use for descriptive
+# Import dataset that we want to use for descriptive
 explore_survey <- read_csv("data/forthright_survey.csv")
 
 #Gender
