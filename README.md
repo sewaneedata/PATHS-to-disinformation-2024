@@ -5,7 +5,7 @@ This is the repository for the PATHS to Disinformation 2024 project by Sewanee D
 
 To run this code you have to install `RStudio` and install every library per each script. Mainly what most of the scripts on this repository do is clean the dense data sets that we had and put them in a state from which observations can be analyzed. Our observations/results are represented with alluvial diagrams of how people get to disinformation sites, from which relationships between political affiliations and the consumption of disinformation can be inferred.
 
-The data zip can be found in [this link]([[https://github.com/username/repository/issues/123](https://drive.google.com/drive/u/3/folders/17Mc1pOXn5D2gfnLgD6iWsDB3VuHIx9le)](https://drive.google.com/drive/u/3/folders/17Mc1pOXn5D2gfnLgD6iWsDB3VuHIx9le)) to the google drive in the data folder, If you need access, please contact datalab@sewanee.edu.
+The data zip can be found in [this link]((https://drive.google.com/drive/u/3/folders/17Mc1pOXn5D2gfnLgD6iWsDB3VuHIx9le)) to the google drive in the data folder, If you need access, please contact datalab@sewanee.edu.
 
 # Paths Script Order
 
