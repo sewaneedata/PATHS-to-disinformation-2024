@@ -1,5 +1,6 @@
 ---
 title: "Final Report"
+author: "Gabe Rice, Jawaria Jaleel, Mohamed Salem, Nicole Nguyen, Perla Guzman Martinez"
 output: tint::tintHtml
 ---
 
@@ -14,11 +15,11 @@ load("data/explore_forthright.RData")
 load("data/explore_yougov.RData")
 ```
 
-### Introduction 
+## Introduction 
 
 This project, PATHS to Disinformation, analyzed two datasets provided by YouGov and Forthright (~700 participants) that tracked the participants' browsing histories in a period that spanned 3-4 months. The goals of this analysis were to map the digital pathways of these individuals, identify the online platforms that lead them to disinformation, and interpret the relationship between their political affiliations and their exposure to disinformation.
 
-### Methodology
+## Methodology
 
 Based on the data provided by our client, we’ve made several adjustments across multiple scripts. Since we worked with two different web tracking processes, each dataset (YouGov and Forthright) has its own individual scripts that essentially perform the same functions. It’s advisable to start with the YouGov scripts, as they include the disinformation list and the WP3 list of media sources.
 
@@ -34,9 +35,9 @@ In the second script, `explore_forthright.R`, the focus is on examining the beha
 
 The third script, `table_forthright.R`, enhances the visualization of survey responses by generating a detailed table. This script aims to provide a clear and comprehensive display table of the survey data.
 
-### Visualizations
+## Visualizations
 
-#### Forthright dataset
+### Forthright dataset
 ```{r}
 
 # code goes here to make the alluvial diagrams of disinformation visit
@@ -78,11 +79,10 @@ ggplot(paths_2 %>% drop_na(ideology) %>% filter( axis2 != "non", ideology!="Neut
        fill = "Political affiliation")
 ```
 
-Forthright:
 The majority of the digital pathways in the Forthright dataset start at Google, with higher traffic coming from individuals who consider themselves right-wing. For left-wing individuals, their paths split into two main routes after arriving at CNN: one group stays there, while the other continues browsing. In contrast, right-wing individuals display more consistency in their browsing and news visits. They tend to stay on sites that align with their ideologies, and none of them visited opposing disinformation sites after their initial visit to ideologically similar media.
 Partisan media visits reveal that most of the media in the Forthright dataset is classified as right-wing. Additionally, the media choices of the audience are highly coordinated, as they primarily visit biased sites that reinforce their existing beliefs.
 
-#### YouGov dataset
+### YouGov dataset
 ```{r}
 #Disinformation visits
 top_3 <- explore_yougov %>%
@@ -122,12 +122,11 @@ ggplot( path_2 %>% drop_na(ideology) %>%  filter(axis2 != "non", ideology != "ne
        fill = "Political affiliation")
 ```
 
-YouGov:
 In the YouGov dataset, the paths taken by the participants, whether they are left-wing or right-wing were consistent. Interestingly, there is a high percentage of left-wing individuals who stay on Fox News (right-leaning), even surpassing right-wing visits to Fox News in the final column. In contrast, individuals who consider themselves right-wing exhibit more consistency in their online pathways, with only a small percentage visiting CNN.
 The analysis of partisan media visits from YouGov indicates that there is more left-aligned media than right-aligned media. Overall, this reinforces the idea that the right-wing audience is more coordinated compared to the left-wing audience.
 
 
-### Conclusion
+## Conclusion
 
 We reached the conclusion that the start site/platform is accessed by 3 types of politically affiliated individuals: neutral, left-leaning, and right-leaning. The majority of the pathways followed by right-leaning individuals stay consistent until they arrive at a source of disinformation. Individuals start either Facebook (right-leaning), Google (right-leaning), or YouTube (left-leaning), which is followed by the arrival at a news source that specifically leads individuals to disinformation. After that, people will either keep searching for more news on the same site which widens the spread of disinformation, or just simply click out the site. 
 Our analysis process was slowed down for two reasons. First,the list provided on all sites in the dataset classifying whether they were considered reliable or unreliable seemed outdated and unreliable in itself, and some sites like the food.news, for instance, is labeled as pseudoscience or conspiracy site, which can skew findings. Second, certain news sites that were not labeled as left or right-wing were not used, therefore, losing certain pieces of data in translation.
