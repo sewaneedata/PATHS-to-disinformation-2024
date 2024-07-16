@@ -10,7 +10,7 @@ To install and run this project:
 4. Clone our GitHub repository!  
       1. Go to the Project tab in the upper right corner RStudio.  
       2. Click New Project -> Version Control -> Git  
-      3. Enter the URL of our repository (https://github.com/sewaneedata/TN-disenfranchisement-2024/tree/main) and specify the directory where you want to clone the repository.  
+      3. Enter the URL of our repository (https://github.com/sewaneedata/PATHS-to-disinformation-2024/blob/main) and specify the directory where you want to clone the repository.  
       4. Click Create Project!  
 5. Install the following dependencies using the install.packages() function. (You can also just run our "packages" script.)
    1. "tidyverse"
