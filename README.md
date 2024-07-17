@@ -58,3 +58,7 @@ Based on the data provided by our client, we’ve made several adjustments acros
 
 ### 3. `table_forthright.R`
 - **Function**: Offers a more effective way to visualize survey questions by creating a comprehensive table to display the responses.
+
+# Final Report
+The `Report.Rmd` file generates our final report that was sent to our partner.
+
